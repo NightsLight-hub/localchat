@@ -1,0 +1,1 @@
+registerUser(String nickName) {}

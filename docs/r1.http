@@ -1,0 +1,19 @@
+PUT http://localhost:8080/api/user
+Content-Type: application/json
+
+{
+  "name": "John",
+  "surname": "Doe",
+  "age": 30
+}
+
+###
+GET http://localhost:8080/api/1
+Accept: application/json
+
+###
+
+GET http://localhost:8080/api/
+Accept: application/json
+
+###

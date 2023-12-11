@@ -1,0 +1,112 @@
+{
+  "locale": "English",
+  "appName": "LocalSend",
+  "general": {
+    "accept": "Accept",
+    "accepted": "Accepted",
+    "add": "Add",
+    "advanced": "Advanced",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "continueStr": "Continue",
+    "copy": "Copy",
+    "copiedToClipboard": "Copied to Clipboard",
+    "decline": "Decline",
+    "done": "Done",
+    "delete": "Delete",
+    "edit": "Edit",
+    "error": "Error",
+    "example": "Example",
+    "files": "Files",
+    "finished": "Finished",
+    "hide": "Hide",
+    "off": "Off",
+    "offline": "Offline",
+    "on": "On",
+    "online": "Online",
+    "open": "Open",
+    "queue": "Queue",
+    "quickSave": "Quick Save",
+    "renamed": "Renamed",
+    "reset": "Reset",
+    "restart": "Restart",
+    "settings": "Settings",
+    "skipped": "Skipped",
+    "start": "Start",
+    "stop": "Stop",
+    "save": "Save",
+    "unchanged": "Unchanged",
+    "unknown": "Unknown",
+    "noItemInClipboard": "No item in Clipboard"
+  },
+  "networkTab": {
+    "title": "Network"
+  },
+  "chatTab": {
+    "title": "Chat"
+  },
+  "settingsTab": {
+    "title": "Settings",
+    "general": {
+      "title": "General",
+      "brightness": "Theme",
+      "brightnessOptions": {
+        "system": "System",
+        "dark": "Dark",
+        "light": "Light"
+      },
+      "color": "Color",
+      "colorOptions": {
+        "system": "System",
+        "oled": "OLED"
+      },
+      "language": "Language",
+      "languageOptions": {
+        "system": "System"
+      },
+      "saveWindowPlacement": "Quit: Save window placement",
+      "minimizeToTray": "Quit: Minimize to Tray/Menu Bar",
+      "launchAtStartup": "Autostart after login",
+      "launchMinimized": "Autostart: Start hidden",
+      "animations": "Animations"
+    },
+    "receive": {
+      "title": "Receive",
+      "quickSave": "@:general.quickSave",
+      "destination": "Destination",
+      "downloads": "(Downloads)",
+      "saveToGallery": "Save media to gallery",
+      "saveToHistory": "Save to history"
+    },
+    "network": {
+      "title": "Network",
+      "needRestart": "Restart the server to apply the settings!",
+      "server": "Server",
+      "alias": "Alias",
+      "deviceType": "Device type",
+      "deviceModel": "Device model",
+      "port": "Port",
+      "portWarning": "You might not be detected by other devices because you are using a custom port. (default: {defaultPort})",
+      "encryption": "Encryption",
+      "multicastGroup": "Multicast",
+      "multicastGroupWarning": "You might not be detected by other devices because you are using a custom multicast address. (default: {defaultMulticast})"
+    },
+    "advancedSettings": "Advanced settings"
+  },
+  "troubleshootPage": {
+    "title": "Troubleshoot",
+    "subTitle": "This app does not work as expected? Here you can find common solutions.",
+    "solution": "Solution:",
+    "fixButton": "Fix automatically",
+    "firewall": {
+      "symptom": "This app can send files to other devices but other devices cannot send files to this device.",
+      "solution": "This is most likely a firewall issue. You can solve this by allowing incoming connections (UDP and TCP) on port {port}.",
+      "openFirewall": "Open Firewall"
+    },
+    "noConnection": {
+      "symptom": "Both devices cannot discover each other nor can they share files.",
+      "solution": "The problem exists on both sides? Then you need to make sure that both devices are in the same wifi network and share the same configuration (port, multicast address, encryption). The wifi may not allow communication between participants. In this case, this option must be enabled on the router."
+    }
+  }
+}

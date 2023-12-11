@@ -1,0 +1,22 @@
+#0   main (package:localchat/main.dart:19:10)
+cachePath: C:\Users\sunxy\Documents\localchat\database
+#0   main (package:localchat/main.dart:24:12)
+Rest Server running on InternetAddress('0.0.0.0', IPv4):8080
+#0   main (package:localchat/main.dart:27:10)
+Websocket Server running on InternetAddress('0.0.0.0', IPv4):8081
+#0   WebSocketService.addChannel.<anonymous closure> (package:localchat/http/websocket_service.dart:28:14)
+message: {"type":0,"body":"{\"userId\":\"9de92dd9-ab0d-4e80-bde9-d4366116d9ae\",\"nickName\":\"孙星宇\",\"me\":0}"}
+#0   WebSocketService.addChannel.<anonymous closure> (package:localchat/http/websocket_service.dart:28:14)
+message: {"type":1,"body":"{\"msgID\":\"414d8830-9d0e-45a6-a9e0-3a65df52e816\",\"createTime\":1702267717596,\"senderID\":\"9de92dd9-ab0d-4e80-bde9-d4366116d9ae\",\"contentType\":0,\"senderPlatformID\":1,\"senderNickname\":\"主持人\",\"content\":[232,181,182,228,184,138]}"}
+#0   WebSocketService.addChannel.<anonymous closure> (package:localchat/http/websocket_service.dart:42:20)
+sendMessage
+#0   ConversationMessageBoxState._buildMessageInputRow.<anonymous closure> (package:localchat/pages/chat/conversation_message_box.dart:114:26)
+prepare to send file E:\2023年工作文档\觅听h323呼叫小鱼问题排查情况.docx
+#0   addDownloadMount (package:localchat/http/router.dart:52:10)
+mount E:\2023年工作文档, 觅听h323呼叫小鱼问题排查情况.docx
+#0   ConversationMessageBoxState._buildMessageInputRow.<anonymous closure> (package:localchat/pages/chat/conversation_message_box.dart:114:26)
+prepare to send file E:\2023年工作文档\觅听多协议网关规划与进展.xmind
+#0   addDownloadMount (package:localchat/http/router.dart:52:10)
+mount E:\2023年工作文档, 觅听多协议网关规划与进展.xmind
+#0   ConversationMessageBoxState._renderFileMsg.<anonymous closure>.<anonymous closure> (package:localchat/pages/chat/conversation_message_box.dart:243:24)
+download file http://172.18.39.162:8080/download-d52152f6-1369-45b5-b675-a83c193174f1/觅听多协议网关规划与进展.xmind to F:\1-GITHUB\flutter\localchat\cache/download\觅听多协议网关规划与进展.xmind success
