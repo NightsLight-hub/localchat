@@ -1,6 +1,5 @@
 // SessionMessageBox 是消息展示区域
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -13,10 +12,11 @@ import 'package:localchat/http_utils.dart';
 import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
+import 'package:localchat/pages/chat/FileMessage.dart';
 import 'package:localchat/state/messages_state.dart';
+import 'package:localchat/utils.dart' as utils;
 import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:localchat/utils.dart' as utils;
 import 'package:path/path.dart' as p;
 
 class ConversationMessageBox extends ConsumerStatefulWidget {
@@ -55,7 +55,7 @@ class ConversationMessageBoxState
   @override
   Widget build(BuildContext context) {
     var messages = ref.watch(messagesNotifierProvider);
-    List<MessageModelData> renderMessages;
+    List<String> renderMessages;
     if (messages.isLoading) {
       renderMessages = [];
     } else {
@@ -77,7 +77,7 @@ class ConversationMessageBoxState
     );
   }
 
-  Widget _buildMessageShowWidget(List<MessageModelData> renderMessages) {
+  Widget _buildMessageShowWidget(List<String> renderMessages) {
     _scrollToBottom();
     return Expanded(
         child: ListView.builder(
@@ -85,11 +85,7 @@ class ConversationMessageBoxState
       controller: _scrollController,
       itemCount: renderMessages.length,
       itemBuilder: (context, index) {
-        if (renderMessages[index].senderID != Config().selfId) {
-          return renderMessage(renderMessages[index]);
-        } else {
-          return renderMessage(renderMessages[index], isSelf: true);
-        }
+        return renderMessage(getMsg(renderMessages[index])!);
       },
     ));
   }
@@ -191,7 +187,8 @@ class ConversationMessageBoxState
   }
 
   // 渲染消息， 用于抽象不同消息类型的展示
-  Row renderMessage(MessageModelData msg, {bool isSelf = false}) {
+  Widget renderMessage(MessageModelData msg) {
+    var isSelf = msg.senderID == Config().selfId;
     switch (ContentType.values[msg.contentType!]) {
       case ContentType.text:
         var contentStr = utf8.decode(msg.content!);
@@ -207,54 +204,103 @@ class ConversationMessageBoxState
     }
   }
 
-  Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
-    var filePath = utf8.decode(msg.content!);
-    var fileUrl = '${Config().address}$filePath';
-    var fileName = p.basename(filePath);
-    var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
-    var senderAvatar = Container(
-      margin: const EdgeInsets.all(10),
-      child: Image(
-          width: 50,
-          height: 50,
-          image: AssetImage(isSelf
-              ? 'assets/images/avatarMan.jpg'
-              : 'assets/images/avatarMan.jpg')),
-    );
-    var messageText = Container(
-      margin: const EdgeInsets.all(5.0),
-      constraints: const BoxConstraints(maxWidth: 600),
-      decoration: BoxDecoration(
-        color: const Color(0xFF95EC69),
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        border: Border.all(width: 8, color: Colors.white),
-      ),
-      child: FloatingActionButton.extended(
-          icon: const Icon(Icons.file_open),
-          tooltip: '文件路径: $fileUrl',
-          onPressed: () {
-            var cachePath = utils.getDownloadPath(filename: fileName);
-            if (File(cachePath).existsSync()) {
-              OpenFile.open(cachePath);
-              return;
-            }
-            try {
-              HttpUtil.download(fileUrl, savePath: cachePath).then((value) {
-                logger.i('download file $fileUrl to $cachePath success');
-              });
-            } catch (e) {
-              logger.e('download file $fileUrl to $cachePath failed', error: e);
-            }
-          },
-          label: Text(fileName)),
-    );
-    return Row(
-      mainAxisAlignment: align,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
-    );
+  FileMessage _renderFileMsg(MessageModelData msgModel, {bool isSelf = false}) {
+    return FileMessage(
+        msg: msgModel,
+        isSelf: isSelf,
+        serverAddress: Config().address,
+        onPressed: (fileUrl, fileName) {
+          var cachePath = utils.getDownloadPath(filename: fileName);
+          var file = File(cachePath);
+          var exist = file.existsSync();
+          if (msgModel.downloaded && exist) {
+            // downloaded is true, and file exists, then we can open it.
+            // it should be removed and downloaded again
+            OpenFile.open(cachePath);
+            return cachePath;
+          }
+          // if file not exists, we should download it, try to remove it at first.
+          // if downloaded = false, but the file is existed, then the fileMessage may
+          // have be sent multiple times, we should remove it and download again.
+          if (exist) {
+            file.deleteSync();
+          }
+          try {
+            HttpUtil.download(fileUrl, savePath: cachePath).then((value) {
+              logger.i('download file $fileUrl to $cachePath success');
+              msgModel.downloaded = true;
+              ref.read(messagesNotifierProvider.notifier).add(msgModel);
+            });
+            return cachePath;
+          } catch (e) {
+            logger.e('download file $fileUrl to $cachePath failed', error: e);
+            return '';
+          }
+        });
   }
+
+  // Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
+  //   var filePath = utf8.decode(msg.content!);
+  //   var fileUrl = '${Config().address}$filePath';
+  //   var fileName = p.basename(filePath);
+  //   var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
+  //   var senderAvatar = Container(
+  //     margin: const EdgeInsets.all(10),
+  //     child: Image(
+  //         width: 50,
+  //         height: 50,
+  //         image: AssetImage(isSelf
+  //             ? 'assets/images/avatarMan.jpg'
+  //             : 'assets/images/avatarMan.jpg')),
+  //   );
+  //   var messageText = Container(
+  //     margin: const EdgeInsets.all(5.0),
+  //     constraints: const BoxConstraints(maxWidth: 600),
+  //     decoration: BoxDecoration(
+  //       color: const Color(0xFF95EC69),
+  //       borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+  //       border: Border.all(width: 8, color: Colors.white),
+  //     ),
+  //     child: FloatingActionButton.extended(
+  //         icon: msg.downloaded
+  //             ? const Icon(Icons.file_download_done)
+  //             : const Icon(Icons.file_download),
+  //         tooltip: '文件路径: $fileUrl',
+  //         onPressed: () {
+  //           var cachePath = utils.getDownloadPath(filename: fileName);
+  //           var file = File(cachePath);
+  //           var exist = file.existsSync();
+  //           if (msg.downloaded && exist) {
+  //             // downloaded is true, and file exists, then we can open it.
+  //             // it should be removed and downloaded again
+  //             OpenFile.open(cachePath);
+  //             return;
+  //           }
+  //           // if file not exists, we should download it, try to remove it at first.
+  //           // if downloaded = false, but the file is existed, then the fileMessage may
+  //           // have be sent multiple times, we should remove it and download again.
+  //           if (exist) {
+  //             file.deleteSync();
+  //           }
+  //           try {
+  //             HttpUtil.download(fileUrl, savePath: cachePath).then((value) {
+  //               logger.i('download file $fileUrl to $cachePath success');
+  //               msg.downloaded = true;
+  //               ref.read(messagesNotifierProvider.notifier).add(msg);
+  //             });
+  //           } catch (e) {
+  //             logger.e('download file $fileUrl to $cachePath failed', error: e);
+  //           }
+  //         },
+  //         label: Text(fileName)),
+  //   );
+  //   return Row(
+  //     mainAxisAlignment: align,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children:
+  //         isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
+  //   );
+  // }
 
   /// RenderText is used to render message
   ///

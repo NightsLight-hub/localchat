@@ -44,7 +44,7 @@ class NetworkPageState extends ConsumerState<NetworkPage> {
 
   String _generateChatServerUrl(String ip) {
     Config().setAddress('http://$ip:8080');
-    return "http://${Config().address}/front/";
+    return "${Config().address}/front/";
   }
 
   Row _buildQrControlPanel() {

@@ -45,6 +45,7 @@ class MessageModelData {
   int? contentType;
   int? senderPlatformID;
   String? senderNickname;
+  bool downloaded = false;
 
   // String? senderFaceURL;
   List<int>? content;
@@ -58,6 +59,7 @@ class MessageModelData {
       'senderPlatformID': senderPlatformID,
       'senderNickname': senderNickname,
       'content': content,
+      'downloaded': downloaded,
     };
   }
 
@@ -90,6 +92,7 @@ class MessageModelData {
     senderPlatformID = body['senderPlatformID'];
     senderNickname = body['senderNickname'];
     content = body['content'].cast<int>();
+    downloaded = body['downloaded'] ?? false;
   }
 }
 

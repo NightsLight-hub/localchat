@@ -2,7 +2,17 @@ import 'dart:html';
 
 import 'package:localchat/models/dbmodels_adapter.dart';
 
+String selfId = 'self';
+
 UserModelData? _user;
+
+String _address = '';
+
+set address(String a) {
+  _address = a;
+}
+
+String get address => _address;
 
 UserModelData? getUserModelData() {
   return _user;

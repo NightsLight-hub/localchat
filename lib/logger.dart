@@ -21,7 +21,7 @@ Logger _logger = Logger(
   output: MultiOutput([
     ConsoleOutput(),
     MyFileOutput(
-      file: File('log.txt'),
+      file: File('localchat.log'),
       overrideExisting: true,
     ),
   ]),

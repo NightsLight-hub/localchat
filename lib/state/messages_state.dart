@@ -3,10 +3,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'messages_state.g.dart';
 
+Map<String, MessageModelData> _msgMap = {};
+
+MessageModelData? getMsg(String msgId) => _msgMap[msgId];
+_addMsg(MessageModelData msg) => _msgMap[msg.msgID!] = msg;
+
 @Riverpod(keepAlive: true)
 class MessagesNotifier extends _$MessagesNotifier {
   @override
-  Future<List<MessageModelData>> build() async {
+  Future<List<String>> build() async {
     return [];
   }
 
@@ -19,8 +24,9 @@ class MessagesNotifier extends _$MessagesNotifier {
     // throw an error if the state is in error state.
     final previousState = await future;
 
-    // We can then update the state, by creating a new state object.
-    // This will notify all listeners.
-    state = AsyncData([...previousState, msg]);
+    if (getMsg(msg.msgID!) == null) {
+      state = AsyncData([...previousState, msg.msgID!]);
+    }
+    _addMsg(msg);
   }
 }

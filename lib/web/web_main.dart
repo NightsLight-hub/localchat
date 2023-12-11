@@ -7,15 +7,19 @@ import 'package:localchat/web/pages/web_chat_page.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 
-main() {
+main(List<String> args) {
   String currentUrl = window.location.href;
-  connectWs(currentUrl);
+  common.logI('currentUrl: $currentUrl');
+  Uri uri = Uri.parse(currentUrl);
+  // common.address = 'http://${uri.host}:${uri.port}';
+  common.address = 'http://localhost:8080';
+  common.logI('server address: ${common.address}');
+  connectWs(uri);
   runApp(const WebFramework());
 }
 
-connectWs(String currentUrl) {
-  common.logI('currentUrl: $currentUrl');
-  var wsServerUrl = "ws://${Uri.parse(currentUrl).host}:8081";
+connectWs(Uri uri) {
+  var wsServerUrl = "ws://${uri.host}:8081";
   common.logI('wsServerUrl: $wsServerUrl');
   WebWsService().init(wsServerUrl);
 }

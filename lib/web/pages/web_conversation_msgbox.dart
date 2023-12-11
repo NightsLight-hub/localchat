@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
+import 'package:path/path.dart' as p;
 
 class WebConversationMsgBox extends ConsumerStatefulWidget {
   const WebConversationMsgBox({Key? key}) : super(key: key);
@@ -45,7 +47,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
   @override
   Widget build(BuildContext context) {
     var messages = ref.watch(messagesNotifierProvider);
-    List<MessageModelData> renderMessages;
+    List<String> renderMessages;
     if (messages.isLoading) {
       renderMessages = [];
     } else {
@@ -67,7 +69,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
   }
 
-  Widget _buildMessageShowWidget(List<MessageModelData> renderMessages) {
+  Widget _buildMessageShowWidget(List<String> renderMessages) {
     _scrollToBottom();
     return Expanded(
         child: ListView.builder(
@@ -76,11 +78,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       controller: _scrollController,
       itemCount: renderMessages.length,
       itemBuilder: (context, index) {
-        if (renderMessages[index].senderID != "self") {
-          return renderMessage(renderMessages[index]);
-        } else {
-          return renderMessage(renderMessages[index], isSelf: true);
-        }
+        return renderMessage(getMsg(renderMessages[index])!,
+            isSelf: renderMessages[index] == common.selfId);
       },
     ));
   }
@@ -157,21 +156,77 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
 
   // 渲染消息， 用于抽象不同消息类型的展示
   Row renderMessage(MessageModelData msg, {bool isSelf = false}) {
-    if (msg.contentType == ContentType.text.value) {
-      var contentStr = utf8.decode(msg.content!);
-      return _renderText(msg.senderNickname!, contentStr, isSelf: isSelf);
-    } else {
-      return const Row(children: [
-        Text("unknown message"),
-      ]);
+    switch (ContentType.values[msg.contentType!]) {
+      case ContentType.text:
+        var contentStr = utf8.decode(msg.content!);
+        return _renderTextMsg(msg.senderNickname!, contentStr, isSelf: isSelf);
+      case ContentType.file:
+        return _renderFileMsg(msg, isSelf: isSelf);
+      default:
+        return const Row(children: [
+          Text("unknown message"),
+        ]);
     }
+  }
+
+  Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
+    var filePath = utf8.decode(msg.content!);
+    var fileUrl = '${common.address}$filePath';
+    var fileName = p.basename(filePath);
+    var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
+    var senderAvatar = Container(
+      margin: const EdgeInsets.all(10),
+      child: Image(
+          width: 50,
+          height: 50,
+          image: AssetImage(isSelf
+              ? 'assets/images/avatarMan.jpg'
+              : 'assets/images/avatarMan.jpg')),
+    );
+    var messageText = Container(
+      margin: const EdgeInsets.all(5.0),
+      constraints: const BoxConstraints(maxWidth: 600),
+      decoration: BoxDecoration(
+        color: const Color(0xFF95EC69),
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        border: Border.all(width: 8, color: Colors.white),
+      ),
+      child: FloatingActionButton.extended(
+          icon: const Icon(Icons.file_open),
+          tooltip: '文件路径: $fileUrl',
+          onPressed: () {
+            try {
+              _downloadFile(fileUrl, fileName);
+            } catch (e) {
+              common.logE('download file $fileUrl failed, error: e');
+            }
+          },
+          label: Text(fileName)),
+    );
+    return Row(
+      mainAxisAlignment: align,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
+    );
+  }
+
+  _downloadFile(String fileUrl, fileName) {
+    HtmlDocument htmlDocument = document;
+    AnchorElement anchor = htmlDocument.createElement('a') as AnchorElement;
+    anchor.href = fileUrl;
+    anchor.style.display = fileName;
+    anchor.download = fileName;
+    document.body!.children.add(anchor);
+    anchor.click();
+    document.body!.children.remove(anchor);
   }
 
   /// RenderText is used to render message
   ///
   /// if isSelf is true, the message will be rendered on the right side,
   /// otherwise on the left side
-  Row _renderText(String name, String content, {bool isSelf = false}) {
+  Row _renderTextMsg(String name, String content, {bool isSelf = false}) {
     String fellowAvtar = 'assets/images/avatarMan.jpg';
     var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
     var senderAvatar = Container(
