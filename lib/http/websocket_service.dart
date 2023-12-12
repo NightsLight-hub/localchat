@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:localchat/http/websocket_message.dart';
 import 'package:localchat/logger.dart';
+import 'package:localchat/models/common.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
 import 'package:shelf/shelf.dart';
@@ -41,10 +42,7 @@ class WebSocketService {
           case WsMsgType.sendMessage:
             logger.i('sendMessage');
             var msgModel = MessageModelData.fromJson(jsonDecode(wsMsg.body));
-            utils
-                .getMainRef()
-                .read(messagesNotifierProvider.notifier)
-                .add(msgModel);
+            _processMessage(msgModel);
             break;
           default:
             logger.i('unknown websocket message: $message');
@@ -62,6 +60,26 @@ class WebSocketService {
           'listen websocket $address channel done, reason: ${channel.closeReason}');
       addressChannelMap.remove(address);
     });
+  }
+
+  _processMessage(MessageModelData msgModel) {
+    if (msgModel.contentType == ContentType.file.value) {
+      utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
+      var token = "123456";
+      logger.i('send file handler');
+      var msg = MessageModelData(
+        msgId: msgModel.msgId,
+        fromUserId: msgModel.fromUserId,
+        toUserId: msgModel.toUserId,
+        contentType: ContentType.file.value,
+        content: msgModel.content,
+        token: token,
+        timestamp: msgModel.timestamp,
+      );
+      sendMessage(msg);
+    } else if (msgModel.contentType == ContentType.text.value) {
+      utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
+    }
   }
 
   sendMessage(MessageModelData message) {

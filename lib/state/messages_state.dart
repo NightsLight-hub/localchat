@@ -6,7 +6,7 @@ part 'messages_state.g.dart';
 Map<String, MessageModelData> _msgMap = {};
 
 MessageModelData? getMsg(String msgId) => _msgMap[msgId];
-_addMsg(MessageModelData msg) => _msgMap[msg.msgID!] = msg;
+_addMsg(MessageModelData msg) => _msgMap[msg.msgId!] = msg;
 
 @Riverpod(keepAlive: true)
 class MessagesNotifier extends _$MessagesNotifier {
@@ -24,8 +24,8 @@ class MessagesNotifier extends _$MessagesNotifier {
     // throw an error if the state is in error state.
     final previousState = await future;
 
-    if (getMsg(msg.msgID!) == null) {
-      state = AsyncData([...previousState, msg.msgID!]);
+    if (getMsg(msg.msgId!) == null) {
+      state = AsyncData([...previousState, msg.msgId!]);
     }
     _addMsg(msg);
   }

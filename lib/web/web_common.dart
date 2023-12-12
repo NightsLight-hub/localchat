@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:localchat/models/dbmodels_adapter.dart';
+import 'package:dio/dio.dart';
 
 String selfId = 'self';
 
@@ -34,3 +35,8 @@ logW(Object? arg) {
 logE(Object? arg) {
   window.console.error(arg);
 }
+
+var dio = Dio(BaseOptions(
+  connectTimeout: const Duration(seconds: 5),
+  receiveTimeout: const Duration(seconds: 5),
+));

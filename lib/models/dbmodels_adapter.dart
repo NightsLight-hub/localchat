@@ -6,7 +6,7 @@ import 'package:localchat/utils.dart';
 
 class MessageModelData {
   MessageModelData({
-    this.msgID,
+    this.msgId,
     this.createTime,
     this.senderID,
     this.contentType,
@@ -24,7 +24,7 @@ class MessageModelData {
     content = utf8.encode(text);
     createTime = utils.getCurrentTimestampByMill();
     contentType = ContentType.text.value;
-    msgID = utils.uuid();
+    msgId = utils.uuid();
   }
 
   MessageModelData.file(
@@ -36,10 +36,10 @@ class MessageModelData {
     content = utf8.encode(filePath);
     createTime = utils.getCurrentTimestampByMill();
     contentType = ContentType.file.value;
-    msgID = utils.uuid();
+    msgId = utils.uuid();
   }
 
-  String? msgID;
+  String? msgId;
   double? createTime;
   String? senderID;
   int? contentType;
@@ -52,7 +52,7 @@ class MessageModelData {
 
   Map<String, dynamic> toJson() {
     return {
-      'msgID': msgID,
+      'msgID': msgId,
       'createTime': createTime,
       'senderID': senderID,
       'contentType': contentType,
@@ -85,7 +85,7 @@ class MessageModelData {
     if (body['content'] == null) {
       throw Exception('content is null');
     }
-    msgID = body['msgID'];
+    msgId = body['msgID'];
     createTime = double.parse(body['createTime'].toString());
     senderID = body['senderID'];
     contentType = body['contentType'];

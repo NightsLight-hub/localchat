@@ -121,6 +121,6 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
   registerUser(UserModelData user) {
     common.logI('register user ${user.nickName}');
     WebsocketMessage wsMsg = WebsocketMessage.registerUser(user);
-    WebWsService().sendMessage(wsMsg);
+    WebWsService().send(wsMsg);
   }
 }

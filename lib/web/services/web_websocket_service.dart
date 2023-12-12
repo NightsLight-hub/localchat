@@ -20,6 +20,7 @@ class WebWsService {
   WebSocketChannel? channel;
   Uri? uri;
   Timer? _timer;
+  Map<String, Function(String token)> _applyForSendingFileHandlers = {};
 
   void init(String uri) {
     common.logI('WebWsService init');
@@ -63,6 +64,21 @@ class WebWsService {
                 .read(messagesNotifierProvider.notifier)
                 .add(msgModel);
             break;
+          case WsMsgType.sendFilePermit:
+            var data = wsMsg.body;
+            List<String> splits = data.split(' ');
+            if (splits.length != 2) {
+              common.logE('invalid send file permit msg');
+              break;
+            }
+            var msgId = splits[0];
+            var token = splits[1];
+            var handler = _applyForSendingFileHandlers[msgId];
+            if (handler != null) {
+              handler(token);
+            } else {
+              common.logW('no handler for msgId $msgId');
+            }
           default:
             common.logW('unknown websocket message: $message');
             break;
@@ -80,11 +96,17 @@ class WebWsService {
     });
   }
 
-  sendMessage(WebsocketMessage msg) {
+  send(WebsocketMessage msg) {
     if (channel == null) {
       common.logE('websocket channel disconnected');
     } else {
       channel?.sink.add(jsonEncode(msg));
     }
   }
+
+  addApplyForSendingFileHandler(String msgId, Function(String token) handler) =>
+      _applyForSendingFileHandlers[msgId] = handler;
+
+  removeApplyForSendingFileHandler(String msgId) =>
+      _applyForSendingFileHandlers.remove(msgId);
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:localchat/extension/multipart.dart';
 import 'package:localchat/utils.dart' as utils;
 import 'package:localchat/http/websocket_service.dart';
 import 'package:localchat/logger.dart';
@@ -14,20 +16,25 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 var restRouter = shelf_router.Router();
 
 shelf.Handler routes() {
-  restRouter.get('/api/<name|.*>', (shelf.Request request, String name) {
-    var response = {'message': 'Dart API is alive', 'parameters': name};
+  restRouter.get('/api/v1/hello', (shelf.Request request) {
+    var response = {'message': 'localchat API is alive'};
     return shelf.Response.ok(jsonEncode(response));
   });
 
-  restRouter.put('/api/user', (shelf.Request request) async {
-    try {
-      var rawBody = await request.readAsString();
-      var body = jsonDecode(rawBody);
-      var user = UserModelData.fromJson(body);
-      return shelf.Response.ok(jsonEncode(user));
-    } catch (e) {
-      logger.e(e);
-      return shelf.Response.badRequest(body: 'invalid put user request');
+  restRouter.post('/api/v1/file', (shelf.Request request) async {
+    if (request.headers['token'] != "123456") {
+      return shelf.Response.forbidden('upload file request denied');
+    }
+    // if (request.headers['content-index'] ) {
+
+    // }
+
+    var fd = File(utils.getDownloadPath(filename: 'test')).openWrite();
+
+    if (request.isMultipart) {
+      await for (var part in request.parts) {
+        await part.forEach(fd.add);
+      }
     }
   });
 

@@ -54,7 +54,7 @@ class MessageModel {
 
   MessageModelData toData() {
     return MessageModelData(
-      msgID: msgID,
+      msgId: msgID,
       createTime: createTime,
       senderID: senderID,
       contentType: contentType,
