@@ -13,10 +13,18 @@
             "deviceId": "windows"
         },
         {
-            "name": "localchat Web",
+            "name": "localchat Web(d)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
+            "program": "lib/web/web_main.dart",
+            "deviceId": "chrome"
+        },
+        {
+            "name": "localchat Web(r)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
             "program": "lib/web/web_main.dart",
             "deviceId": "chrome"
         },

@@ -38,8 +38,8 @@ class WebsocketMessage {
     body = jsonEncode(messageModel);
   }
 
-  WebsocketMessage.sendFilePermit(String token) {
-    type = WsMsgType.sendMessage;
-    body = token;
+  WebsocketMessage.sendFilePermit(String data) {
+    type = WsMsgType.sendFilePermit;
+    body = data;
   }
 }
