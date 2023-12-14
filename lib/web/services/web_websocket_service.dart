@@ -79,6 +79,7 @@ class WebWsService {
             } else {
               common.logW('no handler for msgId $msgId');
             }
+            break;
           default:
             common.logW('unknown websocket message: $message');
             break;

@@ -72,7 +72,7 @@ extension ReadMultipartRequest on Request {
 /// An entry in a multipart request.
 class Multipart extends MimeMultipart {
   final Request _originalRequest;
-  final MimeMultipart _inner;
+  final MimeMultipart inner;
 
   @override
   final Map<String, String> headers;
@@ -86,8 +86,8 @@ class Multipart extends MimeMultipart {
     return Encoding.getByName(contentType.parameters['charset']);
   }
 
-  Multipart(this._originalRequest, this._inner)
-      : headers = CaseInsensitiveMap.from(_inner.headers);
+  Multipart(this._originalRequest, this.inner)
+      : headers = CaseInsensitiveMap.from(inner.headers);
 
   MediaType? _parseContentType() {
     final value = headers['content-type'];
@@ -117,7 +117,7 @@ class Multipart extends MimeMultipart {
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> data)? onData,
       {void Function()? onDone, Function? onError, bool? cancelOnError}) {
-    return _inner.listen(onData,
+    return inner.listen(onData,
         onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
 }

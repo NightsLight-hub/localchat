@@ -8,15 +8,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/http/websocket_message.dart';
-import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
+import 'package:localchat/models/common.dart' as common_model;
 import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart' as p;
-import 'package:localchat/models/common.dart' as common_model;
 
 class WebConversationMsgBox extends ConsumerStatefulWidget {
   const WebConversationMsgBox({Key? key}) : super(key: key);
@@ -109,9 +108,38 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                       .pickFiles(withData: false, withReadStream: true);
                   filePickerOpen = false;
                   if (result != null && result.files.isNotEmpty) {
-                    common.logI(
-                        'prepare to send file ${result.files.first.name}');
-                    _prepareSendFile(result.files.first);
+                    var file = result.files.first;
+                    var message = MessageModelData.file(file.name,
+                        senderNickname: common.getUserModelData()!.nickName,
+                        senderPlatformID: common_model.Platform.web.value,
+                        senderID: common.getUserModelData()!.userId);
+                    // add message to local
+                    ref.read(messagesNotifierProvider.notifier).add(message);
+                    try {
+                      // send message to server
+                      WebWsService()
+                          .send(WebsocketMessage.sendMessage(message));
+                      // start upload
+                      MultipartFile multipartFile = MultipartFile.fromStream(
+                          () => file.readStream!, file.size,
+                          filename: file.name);
+                      FormData formData = FormData.fromMap({
+                        "file": multipartFile,
+                      });
+                      Uri uri = Uri.parse('${common.address}/api/v1/file');
+                      common.logI('uploadFile to $uri');
+                      var response = await common.dio.postUri(uri,
+                          data: formData,
+                          options: Options(headers: {'token': '123456'}));
+                      if (response.statusCode == 200) {
+                        common.logI('upload file success');
+                      } else {
+                        common.logE(
+                            'upload file failed, response: ${response.data}');
+                      }
+                    } catch (e) {
+                      common.logE('send file failed, error is $e');
+                    }
                   }
                 },
                 child: const Icon(Icons.file_upload)),
@@ -226,35 +254,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
   }
 
-  _prepareSendFile(PlatformFile file) async {
-    var message = MessageModelData.file(file.name,
-        senderNickname: common.getUserModelData()!.nickName,
-        senderPlatformID: common_model.Platform.web.value,
-        senderID: common.getUserModelData()!.userId);
-    ref.read(messagesNotifierProvider.notifier).add(message);
-    try {
-      WebWsService().send(WebsocketMessage.sendMessage(message));
-      WebWsService().addApplyForSendingFileHandler(message.msgId!,
-          (token) async {
-        MultipartFile multipartFile = MultipartFile.fromStream(
-            () => file.readStream!, file.size,
-            filename: file.name);
-        FormData formData = FormData.fromMap({
-          "file": multipartFile,
-        });
-        Uri uri = Uri.parse('${common.address}/api/v1/upload');
-        var response = await common.dio.postUri(uri,
-            data: formData, options: Options(headers: {'token': token}));
-        if (response.statusCode == 200) {
-          common.logI('upload file success');
-        } else {
-          common.logE('upload file failed, status code: ${response.data}');
-        }
-      });
-    } catch (e) {
-      logger.e('send file failed', error: e);
-    }
-  }
+  _prepareSendFile(PlatformFile file) async {}
 
   _sendMessage(BuildContext context) async {
     testReadClipboard(context);
@@ -270,7 +270,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       ref.read(messagesNotifierProvider.notifier).add(message);
       WebWsService().send(WebsocketMessage.sendMessage(message));
     } catch (e, s) {
-      logger.e('sendTextMessage failed', error: e, stackTrace: s);
+      common.logE('sendTextMessage failed, error: $e, stackTrace: $s');
     } finally {
       _inputController.clear();
       _textFocusNode.requestFocus();

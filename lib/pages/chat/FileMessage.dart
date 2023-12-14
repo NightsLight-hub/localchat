@@ -33,6 +33,9 @@ class FileMessageState extends ConsumerState<FileMessage> {
   void initState() {
     super.initState();
     var filePath = utf8.decode(widget.msg.content!);
+    if (!filePath.startsWith('/')) {
+      filePath = '/$filePath';
+    }
     fileUrl = '${widget.serverAddress}$filePath';
     fileName = p.basename(filePath);
     align = widget.isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;

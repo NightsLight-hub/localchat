@@ -17,8 +17,7 @@ extension ReadFormData on Request {
     return type.type == 'multipart' && type.subtype == 'form-data';
   }
 
-  /// Reads invididual form data elements from this request.
-  Stream<FormData> get multipartFormData {
+  Future<List<FormData>> get multipartFormDataList {
     return parts
         .map<FormData?>((part) {
           final rawDisposition = part.headers['content-disposition'];
@@ -34,7 +33,8 @@ extension ReadFormData on Request {
           return FormData._(name, formDataParams['filename'], part);
         })
         .where((data) => data != null)
-        .cast();
+        .cast<FormData>()
+        .toList();
   }
 }
 
