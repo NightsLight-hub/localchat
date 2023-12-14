@@ -67,16 +67,16 @@ class WebSocketService {
       utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
       var token = "123456";
       logger.i('send file handler');
-      var msg = MessageModelData(
-        msgId: msgModel.msgId,
-        fromUserId: msgModel.fromUserId,
-        toUserId: msgModel.toUserId,
-        contentType: ContentType.file.value,
-        content: msgModel.content,
-        token: token,
-        timestamp: msgModel.timestamp,
-      );
-      sendMessage(msg);
+      // var msg = MessageModelData(
+      //   msgId: msgModel.msgId,
+      //   fromUserId: msgModel.fromUserId,
+      //   toUserId: msgModel.toUserId,
+      //   contentType: ContentType.file.value,
+      //   content: msgModel.content,
+      //   token: token,
+      //   timestamp: msgModel.timestamp,
+      // );
+      // sendMessage(msg);
     } else if (msgModel.contentType == ContentType.text.value) {
       utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
     }
