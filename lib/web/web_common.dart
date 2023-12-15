@@ -3,8 +3,6 @@ import 'dart:html';
 import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:dio/dio.dart';
 
-String selfId = 'self';
-
 UserModelData? _user;
 
 String _address = '';
@@ -24,6 +22,8 @@ UserModelData? setUserModelData(UserModelData? u) {
   return _user;
 }
 
+String get selfId => getUserModelData()!.userId;
+
 logI(Object? arg) {
   window.console.log(arg);
 }
@@ -34,6 +34,10 @@ logW(Object? arg) {
 
 logE(Object? arg) {
   window.console.error(arg);
+}
+
+logD(Object? arg) {
+  window.console.debug(arg);
 }
 
 var dio = Dio(BaseOptions(

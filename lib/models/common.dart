@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_mappable/dart_mappable.dart';
 
 part 'common.mapper.dart';
@@ -28,4 +30,11 @@ enum Platform {
   const Platform(this.value);
 
   final int value;
+}
+
+String responseTemplate(String? msg, [String? err]) {
+  msg ??= 'ok';
+  err ??= '';
+  var ret = jsonEncode({'message': msg, 'error': err});
+  return ret;
 }
