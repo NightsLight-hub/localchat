@@ -55,6 +55,23 @@ class FileMessageState extends ConsumerState<FileMessage> {
               ? 'assets/images/avatarMan.jpg'
               : 'assets/images/avatarMan.jpg')),
     );
+    var openDirectoryButton = Container(
+      margin: const EdgeInsets.only(top: 15.0),
+      constraints: const BoxConstraints(maxWidth: 600),
+      child: IconButton(
+        icon: const Icon(Icons.folder_open),
+        tooltip: '打开文件所在文件夹',
+        iconSize: 30,
+        onPressed: () {
+          if (filePath.isNotEmpty) {
+            OpenFile.open(p.dirname(filePath));
+          } else {
+            logger.e(
+                'Cannot open file because filepath is empty, maybe some bug happened');
+          }
+        },
+      ),
+    );
     var messageText = Container(
       margin: const EdgeInsets.all(5.0),
       constraints: const BoxConstraints(maxWidth: 600),
@@ -80,8 +97,8 @@ class FileMessageState extends ConsumerState<FileMessage> {
       mainAxisAlignment: align,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widget.isSelf
-          ? [messageText, senderAvatar]
-          : [senderAvatar, messageText],
+          ? [openDirectoryButton, messageText, senderAvatar]
+          : [senderAvatar, messageText, openDirectoryButton],
     );
   }
 

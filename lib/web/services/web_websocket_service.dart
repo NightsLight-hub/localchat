@@ -20,7 +20,7 @@ class WebWsService {
   WebSocketChannel? channel;
   Uri? uri;
   Timer? _timer;
-  Map<String, Function(String token)> _applyForSendingFileHandlers = {};
+  final Map<String, Function(String token)> _applyForSendingFileHandlers = {};
 
   void init(String uri) {
     common.logI('WebWsService init');
@@ -52,7 +52,7 @@ class WebWsService {
 
   _listenWsMsg() async {
     channel!.stream.listen((message) {
-      common.logI('get msg from ws, $message');
+      common.logD('get msg from ws, $message');
       try {
         var data = jsonDecode(message);
         var wsMsg = WebsocketMessage.fromJson(data);

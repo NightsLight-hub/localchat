@@ -28,11 +28,10 @@ fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
 
 ### 短期规划
 * [ ] 断线重连，用户重新注册逻辑。
-
 * [x] desktop发送文件
 * [x] 文件消息下载、打开（desktop和web都已完成）
 * [x] web端文件上传
-* [ ] 消息广播
+* [ ] 消息广播 -- 研发中
 * [ ] 分段上传：目前上传不支持分段，可能会导致内存占用过多等问题。
 * [ ] 发布包构建脚本
 * [ ] 体验性问题

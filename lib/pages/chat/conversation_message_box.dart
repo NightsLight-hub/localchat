@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emojiPicker;
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/config.dart';
 import 'package:localchat/http/websocket_service.dart';
@@ -14,7 +16,6 @@ import 'package:localchat/oss/oss_service.dart';
 import 'package:localchat/pages/chat/FileMessage.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:flutter/foundation.dart' as foundation;
 
 class ConversationMessageBox extends ConsumerStatefulWidget {
   const ConversationMessageBox({super.key});
@@ -33,6 +34,7 @@ class ConversationMessageBoxState
   bool filePickerOpen = false;
   bool isEmojiShowing = false;
   bool isTextFiledClearButtonShowing = false;
+  final _inputIconColor = const Color.fromARGB(255, 54, 48, 48);
 
   @override
   void initState() {
@@ -67,13 +69,14 @@ class ConversationMessageBoxState
     //   renderMessages = messages;
     // }
     return Expanded(
+        child: SelectionArea(
       child: Column(
         children: [
           _buildMessageShowWidget(renderMessages),
           _buildMessageInputRow(context),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildMessageShowWidget(List<String> renderMessages) {
@@ -92,27 +95,6 @@ class ConversationMessageBoxState
   Column _buildMessageInputRow(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            FloatingActionButton.small(
-                tooltip: '发送图片',
-                onPressed: () async {
-                  if (filePickerOpen) {
-                    return;
-                  }
-                  filePickerOpen = true;
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles();
-                  filePickerOpen = false;
-                  if (result != null) {
-                    logger
-                        .i('prepare to send file ${result.files.single.path}');
-                    _sendFile(result.files.single.path!);
-                  }
-                },
-                child: const Icon(Icons.file_upload)),
-          ],
-        ),
         const SizedBox(height: 10),
         Row(
           children: [
@@ -136,6 +118,24 @@ class ConversationMessageBoxState
                               onPressed: _onCancel,
                             )
                           : const Text(""),
+                      IconButton(
+                          tooltip: '发送图片',
+                          onPressed: () async {
+                            if (filePickerOpen) {
+                              return;
+                            }
+                            filePickerOpen = true;
+                            FilePickerResult? result =
+                                await FilePicker.platform.pickFiles();
+                            filePickerOpen = false;
+                            if (result != null) {
+                              logger.i(
+                                  'prepare to send file ${result.files.single.path}');
+                              _sendFile(result.files.single.path!);
+                            }
+                          },
+                          color: _inputIconColor,
+                          icon: const Icon(Icons.file_upload)),
                       IconButton(
                         icon: const Icon(Icons.emoji_emotions),
                         color: isEmojiShowing
@@ -286,69 +286,6 @@ class ConversationMessageBoxState
     return FileMessage(msg: msgModel, isSelf: isSelf);
   }
 
-  // Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
-  //   var filePath = utf8.decode(msg.content!);
-  //   var fileUrl = '${Config().address}$filePath';
-  //   var fileName = p.basename(filePath);
-  //   var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
-  //   var senderAvatar = Container(
-  //     margin: const EdgeInsets.all(10),
-  //     child: Image(
-  //         width: 50,
-  //         height: 50,
-  //         image: AssetImage(isSelf
-  //             ? 'assets/images/avatarMan.jpg'
-  //             : 'assets/images/avatarMan.jpg')),
-  //   );
-  //   var messageText = Container(
-  //     margin: const EdgeInsets.all(5.0),
-  //     constraints: const BoxConstraints(maxWidth: 600),
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xFF95EC69),
-  //       borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-  //       border: Border.all(width: 8, color: Colors.white),
-  //     ),
-  //     child: FloatingActionButton.extended(
-  //         icon: msg.downloaded
-  //             ? const Icon(Icons.file_download_done)
-  //             : const Icon(Icons.file_download),
-  //         tooltip: '文件路径: $fileUrl',
-  //         onPressed: () {
-  //           var cachePath = utils.getDownloadPath(filename: fileName);
-  //           var file = File(cachePath);
-  //           var exist = file.existsSync();
-  //           if (msg.downloaded && exist) {
-  //             // downloaded is true, and file exists, then we can open it.
-  //             // it should be removed and downloaded again
-  //             OpenFile.open(cachePath);
-  //             return;
-  //           }
-  //           // if file not exists, we should download it, try to remove it at first.
-  //           // if downloaded = false, but the file is existed, then the fileMessage may
-  //           // have be sent multiple times, we should remove it and download again.
-  //           if (exist) {
-  //             file.deleteSync();
-  //           }
-  //           try {
-  //             HttpUtil.download(fileUrl, savePath: cachePath).then((value) {
-  //               logger.i('download file $fileUrl to $cachePath success');
-  //               msg.downloaded = true;
-  //               ref.read(messagesNotifierProvider.notifier).add(msg);
-  //             });
-  //           } catch (e) {
-  //             logger.e('download file $fileUrl to $cachePath failed', error: e);
-  //           }
-  //         },
-  //         label: Text(fileName)),
-  //   );
-  //   return Row(
-  //     mainAxisAlignment: align,
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children:
-  //         isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
-  //   );
-  // }
-
   /// RenderText is used to render message
   ///
   /// if isSelf is true, the message will be rendered on the right side,
@@ -372,27 +309,45 @@ class ConversationMessageBoxState
         ),
       ),
     ]));
+    var copyButton = Container(
+      margin: const EdgeInsets.only(top: 10.0),
+      constraints: const BoxConstraints(maxWidth: 600),
+      child: IconButton(
+        icon: const Icon(Icons.copy),
+        tooltip: '复制',
+        onPressed: () {
+          Clipboard.setData(ClipboardData(text: content)).then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("已复制到剪贴板"),
+              duration: Duration(seconds: 2),
+              backgroundColor: Color(0x202196f3),
+              showCloseIcon: true,
+            ));
+          });
+        },
+      ),
+    );
     var messageText = Container(
-        margin: const EdgeInsets.all(5.0),
-        constraints: const BoxConstraints(maxWidth: 600),
-        decoration: BoxDecoration(
-          color: const Color(0xFF95EC69),
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(width: 8, color: Colors.white),
+      margin: const EdgeInsets.only(top: 5.0),
+      constraints: const BoxConstraints(maxWidth: 600),
+      decoration: BoxDecoration(
+        color: const Color(0xFF95EC69),
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        border: Border.all(width: 8, color: Colors.white),
+      ),
+      child: Text(
+        content,
+        style: const TextStyle(
+          fontSize: 20,
         ),
-        child: SelectionArea(
-          child: Text(
-            content,
-            style: const TextStyle(
-              fontSize: 20,
-            ),
-          ),
-        ));
+      ),
+    );
     return Row(
       mainAxisAlignment: align,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
+      children: isSelf
+          ? [copyButton, messageText, senderAvatar]
+          : [senderAvatar, messageText, copyButton],
     );
   }
 
