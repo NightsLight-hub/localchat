@@ -15,6 +15,7 @@ import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
+import 'package:localchat/utils.dart' as utils;
 import 'package:path/path.dart' as p;
 
 class WebConversationMsgBox extends ConsumerStatefulWidget {
@@ -86,8 +87,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       controller: _scrollController,
       itemCount: renderMessages.length,
       itemBuilder: (context, index) {
-        return renderMessage(getMsg(renderMessages[index])!,
-            isSelf: getMsg(renderMessages[index])!.senderID == common.selfId);
+        var msg = getMsg(renderMessages[index])!;
+        return renderMessage(msg, isSelf: msg.senderID == common.selfId);
       },
     ));
   }
@@ -99,49 +100,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
           children: [
             FloatingActionButton.small(
                 tooltip: '发送图片',
-                onPressed: () async {
-                  if (filePickerOpen) {
-                    return;
-                  }
-                  filePickerOpen = true;
-                  FilePickerResult? result = await FilePicker.platform
-                      .pickFiles(withData: false, withReadStream: true);
-                  filePickerOpen = false;
-                  if (result != null && result.files.isNotEmpty) {
-                    var file = result.files.first;
-                    var message = MessageModelData.file(file.name,
-                        senderNickname: common.getUserModelData()!.nickName,
-                        senderPlatformID: common_model.Platform.web.value,
-                        senderID: common.getUserModelData()!.userId);
-                    // add message to local
-                    ref.read(messagesNotifierProvider.notifier).add(message);
-                    try {
-                      // send message to server
-                      WebWsService()
-                          .send(WebsocketMessage.sendMessage(message));
-                      // start upload
-                      MultipartFile multipartFile = MultipartFile.fromStream(
-                          () => file.readStream!, file.size,
-                          filename: file.name);
-                      FormData formData = FormData.fromMap({
-                        "file": multipartFile,
-                      });
-                      Uri uri = Uri.parse('${common.address}/api/v1/file');
-                      common.logI('uploadFile to $uri');
-                      var response = await common.dio.postUri(uri,
-                          data: formData,
-                          options: Options(headers: {'token': '123456'}));
-                      if (response.statusCode == 200) {
-                        common.logI('upload file success');
-                      } else {
-                        common.logE(
-                            'upload file failed, response: ${response.data}');
-                      }
-                    } catch (e) {
-                      common.logE('send file failed, error is $e');
-                    }
-                  }
-                },
+                onPressed: _sendFile,
                 child: const Icon(Icons.file_upload)),
           ],
         ),
@@ -258,7 +217,57 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
   }
 
-  _prepareSendFile(PlatformFile file) async {}
+  _sendFile() async {
+    if (filePickerOpen) {
+      return;
+    }
+    filePickerOpen = true;
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(withData: false, withReadStream: true);
+    filePickerOpen = false;
+    if (result != null && result.files.isNotEmpty) {
+      common.logD('filePicker result: $result');
+      var file = result.files.first;
+      var message = MessageModelData.file(file.name,
+          senderNickname: common.getUserModelData()!.nickName,
+          senderPlatformID: common_model.Platform.web.value,
+          senderID: common.getUserModelData()!.userId);
+      // add message to local
+      ref.read(messagesNotifierProvider.notifier).add(message);
+      try {
+        // start upload
+        MultipartFile multipartFile = MultipartFile.fromStream(
+            () => file.readStream!, file.size,
+            filename: file.name);
+        FormData formData = FormData.fromMap({
+          "file": multipartFile,
+        });
+        Uri uri = Uri.parse('${common.address}/${utils.ossApiPath()}');
+        common.logI('uploadFile to $uri');
+        var headerMap = {
+          'token': '123456',
+          'msgId': message.msgId,
+        };
+        // upload file to oss
+        common.logD('upload file ${file.name}');
+        var response = await common.dio
+            .postUri(uri, data: formData, options: Options(headers: headerMap));
+        if (response.statusCode == 200) {
+          // get fileUrl and modify message and send it to server
+          print(response.data);
+          String msgId = response.data['message'];
+          message.content =
+              utf8.encode('${utils.ossApiPath()}/$msgId/${file.name}');
+          WebWsService().send(WebsocketMessage.sendMessage(message));
+          common.logI('upload file success');
+        } else {
+          common.logE('upload file failed, response: ${response.data}');
+        }
+      } catch (e) {
+        common.logE('send file failed, error is $e');
+      }
+    }
+  }
 
   _sendMessage(BuildContext context) async {
     testReadClipboard(context);
@@ -311,14 +320,22 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
         return _renderFileMsg(msg, isSelf: isSelf);
       default:
         return const Row(children: [
-          Text("unknown message"),
+          Text(
+            "unknown message",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
         ]);
     }
   }
 
   Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
     var filePath = utf8.decode(msg.content!);
-    var fileUrl = '${common.address}$filePath';
+    if (filePath.startsWith('/')) {
+      filePath.substring(1);
+    }
+    var fileUrl = '${common.address}/$filePath';
     var fileName = p.basename(filePath);
     var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
     var senderAvatar = Container(
@@ -334,7 +351,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       margin: const EdgeInsets.all(5.0),
       constraints: const BoxConstraints(maxWidth: 600),
       decoration: BoxDecoration(
-        color: const Color(0xFF95EC69),
+        color: isSelf ? const Color(0xFF95EC69) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
         border: Border.all(width: 8, color: Colors.white),
       ),
@@ -396,25 +413,16 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
         margin: const EdgeInsets.all(5.0),
         constraints: const BoxConstraints(maxWidth: 600),
         decoration: BoxDecoration(
-          color: const Color(0xFF95EC69),
+          color: isSelf ? const Color(0xFF95EC69) : null,
           borderRadius: const BorderRadius.all(Radius.circular(4.0)),
           border: Border.all(width: 8, color: Colors.white),
         ),
         child: SelectionArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              senderName,
-              const SizedBox(height: 5),
-              Text(
-                content,
-                // style: GoogleFonts.lato(
-                //     textStyle: const TextStyle(
-                //   color: Colors.black,
-                //   fontSize: 18,
-                // )),
-              ),
-            ],
+          child: Text(
+            content,
+            style: const TextStyle(
+              fontSize: 20,
+            ),
           ),
         ));
     return Row(

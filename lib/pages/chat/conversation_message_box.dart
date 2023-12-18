@@ -1,24 +1,19 @@
 // SessionMessageBox 是消息展示区域
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emojiPicker;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/config.dart';
-import 'package:localchat/http/router.dart' as router;
 import 'package:localchat/http/websocket_service.dart';
-import 'package:localchat/http_utils.dart';
 import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
+import 'package:localchat/oss/oss_service.dart';
 import 'package:localchat/pages/chat/FileMessage.dart';
 import 'package:localchat/state/messages_state.dart';
-import 'package:localchat/utils.dart' as utils;
-import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart' as foundation;
 
 class ConversationMessageBox extends ConsumerStatefulWidget {
@@ -218,15 +213,10 @@ class ConversationMessageBoxState
   }
 
   _sendFile(String fileFullPath) {
-    var splitPoint = fileFullPath.lastIndexOf('\\');
-    p.dirname(fileFullPath);
-    // var directory = fileFullPath.substring(0, splitPoint);
-    var directory = p.dirname(fileFullPath);
-    // var fileName = fileFullPath.substring(splitPoint + 1);
-    var fileName = p.basename(fileFullPath);
-    var fileDownloadPath = router.addDownloadMount(directory, fileName);
-    var message = MessageModelData.file(fileDownloadPath,
+    var message = MessageModelData.file('',
         senderNickname: "主持人", senderPlatformID: 1, senderID: Config().selfId);
+    var fileDownloadPath = OssService().upload(message.msgId!, fileFullPath);
+    message.content = utf8.encode(fileDownloadPath);
     _sendWebsocketMessage(message);
   }
 
@@ -293,38 +283,7 @@ class ConversationMessageBoxState
   }
 
   FileMessage _renderFileMsg(MessageModelData msgModel, {bool isSelf = false}) {
-    return FileMessage(
-        msg: msgModel,
-        isSelf: isSelf,
-        serverAddress: Config().address,
-        onPressed: (fileUrl, fileName) {
-          var cachePath = utils.getDownloadPath(filename: fileName);
-          var file = File(cachePath);
-          var exist = file.existsSync();
-          if (msgModel.downloaded && exist) {
-            // downloaded is true, and file exists, then we can open it.
-            // it should be removed and downloaded again
-            OpenFile.open(cachePath);
-            return cachePath;
-          }
-          // if file not exists, we should download it, try to remove it at first.
-          // if downloaded = false, but the file is existed, then the fileMessage may
-          // have be sent multiple times, we should remove it and download again.
-          if (exist) {
-            file.deleteSync();
-          }
-          try {
-            HttpUtil.download(fileUrl, savePath: cachePath).then((value) {
-              logger.i('download file $fileUrl to $cachePath success');
-              msgModel.downloaded = true;
-              ref.read(messagesNotifierProvider.notifier).add(msgModel);
-            });
-            return cachePath;
-          } catch (e) {
-            logger.e('download file $fileUrl to $cachePath failed', error: e);
-            return '';
-          }
-        });
+    return FileMessage(msg: msgModel, isSelf: isSelf);
   }
 
   // Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
@@ -424,11 +383,9 @@ class ConversationMessageBoxState
         child: SelectionArea(
           child: Text(
             content,
-            // style: GoogleFonts.lato(
-            //     textStyle: const TextStyle(
-            //   color: Colors.black,
-            //   fontSize: 18,
-            // )),
+            style: const TextStyle(
+              fontSize: 20,
+            ),
           ),
         ));
     return Row(

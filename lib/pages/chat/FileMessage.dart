@@ -2,22 +2,23 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:localchat/logger.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
+import 'package:localchat/oss/oss_service.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 
 class FileMessage extends ConsumerStatefulWidget {
-  FileMessage({
+  const FileMessage({
     Key? key,
     required this.msg,
     required this.isSelf,
-    required this.serverAddress,
-    required this.onPressed,
   }) : super(key: key);
 
   final MessageModelData msg;
   final bool isSelf;
-  final String serverAddress;
-  final String Function(String fileUrl, String fileName) onPressed;
+
+  // final String Function(String fileUrl, String fileName) onPressed;
 
   @override
   FileMessageState createState() => FileMessageState();
@@ -26,19 +27,21 @@ class FileMessage extends ConsumerStatefulWidget {
 class FileMessageState extends ConsumerState<FileMessage> {
   String fileUrl = '';
   String fileName = '';
+  String filePath = '';
   MainAxisAlignment align = MainAxisAlignment.start;
   String cachePath = '';
 
   @override
   void initState() {
     super.initState();
-    var filePath = utf8.decode(widget.msg.content!);
-    if (!filePath.startsWith('/')) {
-      filePath = '/$filePath';
+    fileUrl = utf8.decode(widget.msg.content!);
+    filePath = OssService().getLocalFilePath(fileUrl) ?? '';
+    if (filePath.isEmpty) {
+      logger.e('FileMessage filepath is empty, maybe some bug happened');
     }
-    fileUrl = '${widget.serverAddress}$filePath';
     fileName = p.basename(filePath);
     align = widget.isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
+    logger.i('render FileMessage: ${widget.msg.msgId}, filePath: $filePath');
   }
 
   @override
@@ -61,16 +64,15 @@ class FileMessageState extends ConsumerState<FileMessage> {
         border: Border.all(width: 8, color: Colors.white),
       ),
       child: FloatingActionButton.extended(
-          icon: widget.msg.downloaded
-              ? const Icon(Icons.file_download_done)
-              : const Icon(Icons.file_download),
+          icon: const Icon(Icons.file_download_done),
           tooltip: _tooltip(),
           onPressed: () {
-            var cp = widget.onPressed(fileUrl, fileName);
-            setState(() {
-              widget.msg.downloaded = true;
-              cachePath = cp;
-            });
+            if (filePath.isNotEmpty) {
+              OpenFile.open(filePath);
+            } else {
+              logger.e(
+                  'Cannot open file because filepath is empty, maybe some bug happened');
+            }
           },
           label: Text(fileName)),
     );

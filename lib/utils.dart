@@ -38,3 +38,7 @@ String getDownloadPath({String? filename}) {
   }
   return downloadPath;
 }
+
+String ossApiPath() {
+  return 'api/v1/file';
+}

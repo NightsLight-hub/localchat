@@ -65,13 +65,10 @@ class WebSocketService {
   _processMessage(MessageModelData msgModel) {
     if (msgModel.contentType == ContentType.file.value) {
       utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
-      // var token = "123456";
-      // logger.i('send file handler');
-      // var msg = WebsocketMessage.sendFilePermit('${msgModel.msgId} $token');
-      // sendToUser(msgModel.senderID!, jsonEncode(msg));
     } else if (msgModel.contentType == ContentType.text.value) {
       utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
     }
+    // todo  broadcast this message
   }
 
   sendToUser(String userId, String msg) {
