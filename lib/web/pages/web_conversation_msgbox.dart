@@ -159,7 +159,6 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                   _sendMessage(context);
                 },
                 decoration: InputDecoration(
-                  icon: const Icon(Icons.message),
                   border: const OutlineInputBorder(),
                   labelText: '消息',
                   suffixIcon: Row(
@@ -213,9 +212,14 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                   // Do something when emoji is tapped (optional)
                   _inputController.text += emoji.emoji;
                 },
+                // Do something when the user taps the backspace button (optional)
+                // Set it to null to hide the Backspace-Button
                 onBackspacePressed: () {
-                  // Do something when the user taps the backspace button (optional)
-                  // Set it to null to hide the Backspace-Button
+                  _inputController
+                    ..text =
+                        _inputController.text.characters.skipLast(1).toString()
+                    ..selection = TextSelection.fromPosition(
+                        TextPosition(offset: _inputController.text.length));
                 },
                 config: Config(
                   columns: 7,
