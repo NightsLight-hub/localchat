@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:dio/dio.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,6 +32,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
   late ScrollController _scrollController;
   late FocusNode _textFocusNode;
   bool filePickerOpen = false;
+  bool isEmojiShowing = false;
+  bool isTextFiledClearButtonShowing = false;
 
   @override
   void initState() {
@@ -77,6 +81,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     _scrollToBottom();
     return Expanded(
         child: ListView.builder(
+      shrinkWrap: false,
       addAutomaticKeepAlives: true,
       padding: const EdgeInsets.all(10),
       controller: _scrollController,
@@ -112,10 +117,39 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                 onEditingComplete: () {
                   _sendMessage(context);
                 },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
                   labelText: '消息',
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _inputController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: onCancel,
+                            )
+                          : const Text(""),
+                      IconButton(
+                        icon: const Icon(Icons.emoji_emotions),
+                        color: isEmojiShowing
+                            ? Colors.blue
+                            : const Color.fromARGB(255, 54, 48, 48),
+                        onPressed: emojiPickerButtonClickEvent,
+                      ),
+                    ],
+                  ),
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    isTextFiledClearButtonShowing = value.isNotEmpty;
+                  });
+                },
+                onSubmitted: (value) => {
+                  _sendMessage(context),
+                  setState(() {
+                    isTextFiledClearButtonShowing = false;
+                  })
+                },
               ),
             ),
             TextButton.icon(
@@ -126,7 +160,59 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
               label: const Text('发送'),
             ),
           ],
-        )
+        ),
+        Offstage(
+          offstage: !isEmojiShowing,
+          child: SizedBox(
+            height: 250,
+            // width: 500,
+            child: EmojiPicker(
+                onEmojiSelected: (Category? category, Emoji emoji) {
+                  // Do something when emoji is tapped (optional)
+                  _inputController.text += emoji.emoji;
+                },
+                // Do something when the user taps the backspace button (optional)
+                // Set it to null to hide the Backspace-Button
+                onBackspacePressed: () {
+                  _inputController
+                    ..text =
+                        _inputController.text.characters.skipLast(1).toString()
+                    ..selection = TextSelection.fromPosition(
+                        TextPosition(offset: _inputController.text.length));
+                },
+                config: Config(
+                  columns: 7,
+                  emojiSizeMax: 32 *
+                      (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                          ? 1.30
+                          : 1.0),
+                  verticalSpacing: 0,
+                  horizontalSpacing: 0,
+                  gridPadding: EdgeInsets.zero,
+                  initCategory: Category.RECENT,
+                  bgColor: const Color(0xFFF2F2F2),
+                  indicatorColor: Colors.blue,
+                  iconColor: Colors.grey,
+                  iconColorSelected: Colors.blue,
+                  backspaceColor: Colors.blue,
+                  skinToneDialogBgColor: Colors.white,
+                  skinToneIndicatorColor: Colors.grey,
+                  enableSkinTones: true,
+                  recentTabBehavior: RecentTabBehavior.RECENT,
+                  recentsLimit: 28,
+                  noRecents: const Text(
+                    'No Recents',
+                    style: TextStyle(fontSize: 20, color: Colors.black26),
+                    textAlign: TextAlign.center,
+                  ), // Needs to be const Widget
+                  loadingIndicator:
+                      const SizedBox.shrink(), // Needs to be const Widget
+                  tabIndicatorAnimDuration: kTabScrollDuration,
+                  categoryIcons: const CategoryIcons(),
+                  buttonMode: ButtonMode.MATERIAL,
+                )),
+          ),
+        ),
       ],
     );
   }
@@ -191,7 +277,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     }
     try {
       var message = MessageModelData.text(msg,
-          senderNickname: "主持人",
+          senderNickname: common.getUserModelData()!.nickName,
           senderPlatformID: 1,
           senderID: common.getUserModelData()!.userId);
       ref.read(messagesNotifierProvider.notifier).add(message);
@@ -205,10 +291,23 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     }
   }
 
+  onCancel() {
+    _inputController.clear();
+    setState(() {
+      isTextFiledClearButtonShowing = false;
+    });
+  }
+
+  emojiPickerButtonClickEvent() {
+    setState(() {
+      isEmojiShowing = !isEmojiShowing;
+    });
+  }
+
   _scrollToBottom() {
-    // Future.delayed(const Duration(milliseconds: 50), () {
-    //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    // });
+    Future.delayed(const Duration(milliseconds: 50), () {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
   // 渲染消息， 用于抽象不同消息类型的展示
@@ -293,7 +392,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
   /// otherwise on the left side
   Row _renderTextMsg(String name, String content, {bool isSelf = false}) {
     String fellowAvtar = 'assets/images/avatarMan.jpg';
-    var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
+    var align = isSelf ? MainAxisAlignment.start : MainAxisAlignment.end;
     var senderAvatar = Container(
       margin: const EdgeInsets.all(10),
       child: Image(
@@ -304,7 +403,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
     var senderName = Text.rich(TextSpan(children: [
       TextSpan(
-        text: isSelf ? '  $name    ' : '$name  ',
+        text: isSelf ? '  $name' : '$name  ',
         style: const TextStyle(
           fontWeight: FontWeight.bold,
         ),

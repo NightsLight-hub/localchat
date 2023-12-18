@@ -1,6 +1,7 @@
 // SessionMessageBox 是消息展示区域
 import 'dart:convert';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emojiPicker;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:localchat/oss/oss_service.dart';
 import 'package:localchat/pages/chat/FileMessage.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 class ConversationMessageBox extends ConsumerStatefulWidget {
   const ConversationMessageBox({super.key});
@@ -29,6 +31,8 @@ class ConversationMessageBoxState
   late ScrollController _scrollController;
   late FocusNode _textFocusNode;
   bool filePickerOpen = false;
+  bool isEmojiShowing = false;
+  bool isTextFiledClearButtonShowing = false;
 
   @override
   void initState() {
@@ -120,9 +124,27 @@ class ConversationMessageBoxState
                 textInputAction: TextInputAction.done,
                 controller: _inputController,
                 onEditingComplete: _sendTextMessage,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
                   labelText: '消息',
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _inputController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: _onCancel,
+                            )
+                          : const Text(""),
+                      IconButton(
+                        icon: const Icon(Icons.emoji_emotions),
+                        color: isEmojiShowing
+                            ? Colors.blue
+                            : const Color.fromARGB(255, 54, 48, 48),
+                        onPressed: _emojiPickerButtonClickEvent,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -132,7 +154,60 @@ class ConversationMessageBoxState
               label: const Text('发送'),
             ),
           ],
-        )
+        ),
+        Offstage(
+          offstage: !isEmojiShowing,
+          child: SizedBox(
+            height: 250,
+            // width: 500,
+            child: emojiPicker.EmojiPicker(
+                onEmojiSelected:
+                    (emojiPicker.Category? category, emojiPicker.Emoji emoji) {
+                  // Do something when emoji is tapped (optional)
+                  _inputController.text += emoji.emoji;
+                },
+                // Do something when the user taps the backspace button (optional)
+                // Set it to null to hide the Backspace-Button
+                onBackspacePressed: () {
+                  _inputController
+                    ..text =
+                        _inputController.text.characters.skipLast(1).toString()
+                    ..selection = TextSelection.fromPosition(
+                        TextPosition(offset: _inputController.text.length));
+                },
+                config: emojiPicker.Config(
+                  columns: 7,
+                  emojiSizeMax: 32 *
+                      (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                          ? 1.30
+                          : 1.0),
+                  verticalSpacing: 0,
+                  horizontalSpacing: 0,
+                  gridPadding: EdgeInsets.zero,
+                  initCategory: emojiPicker.Category.RECENT,
+                  bgColor: const Color(0xFFF2F2F2),
+                  indicatorColor: Colors.blue,
+                  iconColor: Colors.grey,
+                  iconColorSelected: Colors.blue,
+                  backspaceColor: Colors.blue,
+                  skinToneDialogBgColor: Colors.white,
+                  skinToneIndicatorColor: Colors.grey,
+                  enableSkinTones: true,
+                  recentTabBehavior: emojiPicker.RecentTabBehavior.RECENT,
+                  recentsLimit: 28,
+                  noRecents: const Text(
+                    'No Recents',
+                    style: TextStyle(fontSize: 20, color: Colors.black26),
+                    textAlign: TextAlign.center,
+                  ), // Needs to be const Widget
+                  loadingIndicator:
+                      const SizedBox.shrink(), // Needs to be const Widget
+                  tabIndicatorAnimDuration: kTabScrollDuration,
+                  categoryIcons: const emojiPicker.CategoryIcons(),
+                  buttonMode: emojiPicker.ButtonMode.MATERIAL,
+                )),
+          ),
+        ),
       ],
     );
   }
@@ -168,6 +243,19 @@ class ConversationMessageBoxState
       }
       _scrollToBottom();
     }
+  }
+
+  _onCancel() {
+    _inputController.clear();
+    setState(() {
+      isTextFiledClearButtonShowing = false;
+    });
+  }
+
+  _emojiPickerButtonClickEvent() {
+    setState(() {
+      isEmojiShowing = !isEmojiShowing;
+    });
   }
 
   _scrollToBottom() {
