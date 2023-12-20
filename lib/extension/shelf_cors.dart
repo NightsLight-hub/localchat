@@ -19,9 +19,9 @@ const _defaultHeadersList = [
   'origin',
   'user-agent',
   'token',
-  'msgId',
+  'msg-id',
   'file-segment-index',
-  'file-segment-length',
+  'file-total-length',
 ];
 
 const _defaultMethodsList = [

@@ -30,3 +30,35 @@ class MessagesNotifier extends _$MessagesNotifier {
     _addMsg(msg);
   }
 }
+
+@Riverpod(keepAlive: true)
+class MessageSendProgressNotifier extends _$MessageSendProgressNotifier {
+  @override
+  Future<Map<String, double?>> build() async {
+    return {};
+  }
+
+  add(String msgId, double progress) async {
+    // We can then manually update the local cache. For this, we'll need to
+    // obtain the previous state.
+    // Caution: The previous state may still be loading or in error state.
+    // A graceful way of handling this would be to read `this.future` instead
+    // of `this.state`, which would enable awaiting the loading state, and
+    // throw an error if the state is in error state.
+    final previousState = await future;
+
+    state = AsyncData({...previousState, msgId: progress});
+  }
+
+  delete(String msgId) async {
+    // We can then manually update the local cache. For this, we'll need to
+    // obtain the previous state.
+    // Caution: The previous state may still be loading or in error state.
+    // A graceful way of handling this would be to read `this.future` instead
+    // of `this.state`, which would enable awaiting the loading state, and
+    // throw an error if the state is in error state.
+    final previousState = await future;
+
+    state = AsyncData({...previousState, msgId: null});
+  }
+}

@@ -26,7 +26,7 @@ class WebSocketService {
     String address = '${request.url.host}:${request.url.port}';
     addressChannelMap[address] = channel;
     channel.stream.listen((message) {
-      logger.i('message: $message');
+      logger.t('message: $message');
       try {
         var data = jsonDecode(message);
         var wsMsg = WebsocketMessage.fromJson(data);
@@ -40,7 +40,6 @@ class WebSocketService {
                 .add(userModel);
             break;
           case WsMsgType.sendMessage:
-            logger.i('sendMessage');
             var msgModel = MessageModelData.fromJson(jsonDecode(wsMsg.body));
             _processMessage(msgModel);
             break;

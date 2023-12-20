@@ -11,8 +11,8 @@ main(List<String> args) {
   String currentUrl = window.location.href;
   common.logI('currentUrl: $currentUrl');
   Uri uri = Uri.parse(currentUrl);
-  // common.address = 'http://${uri.host}:${uri.port}';
-  common.address = 'http://localhost:8080';
+  common.address = 'http://${uri.host}:${uri.port}';
+  // common.address = 'http://localhost:8080'; // only used when debug
   common.logI('server address: ${common.address}');
   connectWs(uri);
   runApp(const WebFramework());

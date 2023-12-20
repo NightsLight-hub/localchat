@@ -9,6 +9,7 @@ import 'package:localchat/utils.dart' as utils;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
+import 'package:localchat/oss/file_writer.dart';
 
 abstract class IOssService {
   String upload(String msgId, filePath);
@@ -113,7 +114,7 @@ class OssService implements IOssService {
         return Response.forbidden(
             responseTemplate('failed', 'upload file request denied'));
       }
-      String? msgId = request.headers['msgId'];
+      String? msgId = request.headers['msg-id'];
       if (msgId == null || msgId.isEmpty) {
         return Response.forbidden(responseTemplate('failed',
             'upload file request denied because msgId header not exist'));
@@ -121,37 +122,69 @@ class OssService implements IOssService {
       if (!request.isMultipart) {
         return Response.forbidden(responseTemplate('failed', 'not multipart'));
       }
-      IOSink? fd;
-      try {
-        var formData = (await request.multipartFormDataList).first;
-        // var formData = (await request.multipartFormData.toList()).first;
-        var filename = formData.filename;
-        if (filename == null) {
-          return Response.ok(responseTemplate('failed', 'filename is null'),
-              headers: {'content-type': "application/json"});
-        }
-        String filePath = utils.getDownloadPath(filename: filename);
-        var targetFile = File(filePath);
-        if (targetFile.existsSync()) {
-          targetFile.deleteSync();
-        }
-        targetFile.createSync();
-        fd = targetFile.openWrite();
-        var data = await formData.part.readBytes();
-        fd.add(data);
-        await fd.flush();
-        _recordFile(msgId, filePath);
-        logger.i('receive $filename success, total bytes ${data.length}');
-        return Response.ok(responseTemplate(msgId),
-            headers: {'content-type': "application/json"});
-      } catch (e) {
-        return Response.internalServerError(
-            body: responseTemplate('failed', e.toString()),
-            headers: {'content-type': "application/json"});
-      } finally {
-        fd?.close();
+      if (request.headers['file-segment-index'] != null) {
+        return await processSegmentedUpload(request);
+      } else {
+        return await processUpload(request);
       }
     };
+  }
+
+  Future<Response> processUpload(Request request) async {
+    String msgId = request.headers['msg-id']!;
+    try {
+      var formData = (await request.multipartFormDataList).first;
+      // var formData = (await request.multipartFormData.toList()).first;
+      var filename = formData.filename;
+      if (filename == null) {
+        return Response.ok(responseTemplate('failed', 'filename is null'),
+            headers: {'content-type': "application/json"});
+      }
+      String filePath = utils.getDownloadPath(filename: filename);
+      var data = await formData.part.readBytes();
+      FileWriter().writeSync(filePath, data);
+      await FileWriter().flush(filePath);
+      _recordFile(msgId, filePath);
+      logger.i('receive $filename success, total bytes ${data.length}');
+      return Response.ok(responseTemplate(msgId),
+          headers: {'content-type': "application/json"});
+    } catch (e) {
+      return Response.internalServerError(
+          body: responseTemplate('failed', e.toString()),
+          headers: {'content-type': "application/json"});
+    }
+  }
+
+  Future<Response> processSegmentedUpload(Request request) async {
+    int fileIndex = int.parse(request.headers['file-segment-index']!);
+    int fileSize = int.parse(request.headers['file-total-length']!);
+    String msgId = request.headers['msg-id']!;
+    try {
+      var formData = (await request.multipartFormDataList).first;
+      var filename = formData.filename;
+      if (filename == null) {
+        return Response.ok(responseTemplate('failed', 'filename is null'),
+            headers: {'content-type': "application/json"});
+      }
+      String filePath = utils.getDownloadPath(filename: filename);
+      var data = await formData.part.readBytes();
+      FileWriter().writeSync(filePath, data);
+      var currentSize = FileWriter().getSize(filePath);
+      if (currentSize == fileSize) {
+        FileWriter().flush(filePath);
+        _recordFile(msgId, filePath);
+        logger.i('receive $filename success, total bytes ${data.length}');
+      } else {
+        logger.d(
+            'receive [$filename -- $fileIndex] success, currentSize $currentSize, totalSize $fileSize');
+      }
+      return Response.ok(responseTemplate(msgId),
+          headers: {'content-type': "application/json"});
+    } catch (e) {
+      return Response.internalServerError(
+          body: responseTemplate('failed', e.toString()),
+          headers: {'content-type': "application/json"});
+    }
   }
 }
 

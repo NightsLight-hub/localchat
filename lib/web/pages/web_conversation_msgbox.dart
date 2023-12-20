@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:core';
 import 'dart:html';
 
 import 'package:dio/dio.dart';
@@ -14,6 +15,7 @@ import 'package:localchat/models/common.dart' as common_model;
 import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
+import 'package:localchat/web/components/web_file_message.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
@@ -218,46 +220,85 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(withData: false, withReadStream: true);
     filePickerOpen = false;
-    if (result != null && result.files.isNotEmpty) {
-      common.logD('filePicker result: $result');
-      var file = result.files.first;
-      var message = MessageModelData.file(file.name,
-          senderNickname: common.getUserModelData()!.nickName,
-          senderPlatformID: common_model.Platform.web.value,
-          senderID: common.getUserModelData()!.userId);
-      // add message to local
-      ref.read(messagesNotifierProvider.notifier).add(message);
-      try {
-        // start upload
+    if (result == null || result.files.isEmpty) {
+      return;
+    }
+    common.logD('filePicker result: $result');
+    var file = result.files.first;
+    var message = MessageModelData.file(file.name,
+        senderNickname: common.getUserModelData()!.nickName,
+        senderPlatformID: common_model.Platform.web.value,
+        senderID: common.getUserModelData()!.userId);
+    var headerMap = {
+      'token': '123456',
+      'msg-id': message.msgId,
+    };
+    // add message to local
+    ref.read(messagesNotifierProvider.notifier).add(message);
+    Uri uri = Uri.parse('${common.address}/${utils.ossApiPath()}');
+    try {
+      if (file.size > 1024 * 1024 * 10) {
+        // segmented upload
+        common.logI('${file.name} is ${(file.size / 1024 / 1024).floor()}MB');
+        headerMap['file-total-length'] = file.size.toString();
+        int i = -1;
+        int sendLength = 0;
+        await for (var data in file.readStream!) {
+          sendLength += data.length;
+          var progress = (sendLength * 100 / file.size).ceilToDouble() / 100;
+          MultipartFile multipartFile =
+              MultipartFile.fromBytes(data, filename: file.name);
+          headerMap['file-segment-index'] = (i++).toString();
+          common.logD(
+              'upload file ${file.name} -- $i, progress ${progress * 100}%');
+          if (!await _uploadMultipart(uri, multipartFile, headerMap)) {
+            common.logE('upload file ${file.name} -- $i failed');
+            return;
+          }
+          ref
+              .read(messageSendProgressNotifierProvider.notifier)
+              .add(message.msgId!, progress);
+        }
+        // all parts have benn uploaded success
+        _sendFileWebsocketMessage(message, file.name);
+        ref
+            .read(messageSendProgressNotifierProvider.notifier)
+            .delete(message.msgId!);
+      } else {
+        // upload
         MultipartFile multipartFile = MultipartFile.fromStream(
             () => file.readStream!, file.size,
             filename: file.name);
-        FormData formData = FormData.fromMap({
-          "file": multipartFile,
-        });
-        Uri uri = Uri.parse('${common.address}/${utils.ossApiPath()}');
-        common.logI('uploadFile to $uri');
-        var headerMap = {
-          'token': '123456',
-          'msgId': message.msgId,
-        };
-        // upload file to oss
         common.logD('upload file ${file.name}');
-        var response = await common.dio
-            .postUri(uri, data: formData, options: Options(headers: headerMap));
-        if (response.statusCode == 200) {
-          // get fileUrl and modify message and send it to server
-          String msgId = response.data['message'];
-          message.content =
-              utf8.encode('${utils.ossApiPath()}/$msgId/${file.name}');
-          WebWsService().send(WebsocketMessage.sendMessage(message));
-          common.logI('upload file success');
-        } else {
-          common.logE('upload file failed, response: ${response.data}');
+        if (await _uploadMultipart(uri, multipartFile, headerMap)) {
+          _sendFileWebsocketMessage(message, file.name);
         }
-      } catch (e) {
-        common.logE('send file failed, error is $e');
       }
+    } catch (e) {
+      common.logE('send file failed, error is $e');
+    }
+  }
+
+  //
+  _sendFileWebsocketMessage(MessageModelData message, String filename) {
+    message.content =
+        utf8.encode('${utils.ossApiPath()}/${message.msgId!}/$filename');
+    WebWsService().send(WebsocketMessage.sendMessage(message));
+    common.logI('upload file $filename success');
+  }
+
+  Future<bool> _uploadMultipart(Uri uri, MultipartFile multipartFile,
+      Map<String, String?> headerMap) async {
+    FormData formData = FormData.fromMap({
+      "file": multipartFile,
+    });
+    var response = await common.dio
+        .postUri(uri, data: formData, options: Options(headers: headerMap));
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      common.logE('upload file failed, response: ${response.data}');
+      return false;
     }
   }
 
@@ -303,13 +344,13 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
   }
 
   // 渲染消息， 用于抽象不同消息类型的展示
-  Row renderMessage(MessageModelData msg, {bool isSelf = false}) {
+  Widget renderMessage(MessageModelData msg, {bool isSelf = false}) {
     switch (ContentType.values[msg.contentType!]) {
       case ContentType.text:
         var contentStr = utf8.decode(msg.content!);
         return _renderTextMsg(msg.senderNickname!, contentStr, isSelf: isSelf);
       case ContentType.file:
-        return _renderFileMsg(msg, isSelf: isSelf);
+        return WebFileMessage(msg: msg, isSelf: isSelf);
       default:
         return const Row(children: [
           Text(
@@ -320,62 +361,6 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
           ),
         ]);
     }
-  }
-
-  Row _renderFileMsg(MessageModelData msg, {bool isSelf = false}) {
-    var filePath = utf8.decode(msg.content!);
-    if (filePath.startsWith('/')) {
-      filePath.substring(1);
-    }
-    var fileUrl = '${common.address}/$filePath';
-    var fileName = p.basename(filePath);
-    var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
-    var senderAvatar = Container(
-      margin: const EdgeInsets.all(10),
-      child: Image(
-          width: 50,
-          height: 50,
-          image: AssetImage(isSelf
-              ? 'assets/images/avatarMan.jpg'
-              : 'assets/images/avatarMan.jpg')),
-    );
-    var messageText = Container(
-      margin: const EdgeInsets.all(5.0),
-      constraints: const BoxConstraints(maxWidth: 600),
-      decoration: BoxDecoration(
-        color: isSelf ? const Color(0xFF95EC69) : null,
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        border: Border.all(width: 8, color: Colors.white),
-      ),
-      child: FloatingActionButton.extended(
-          icon: const Icon(Icons.file_open),
-          tooltip: '文件路径: $fileUrl',
-          onPressed: () {
-            try {
-              _downloadFile(fileUrl, fileName);
-            } catch (e) {
-              common.logE('download file $fileUrl failed, error: e');
-            }
-          },
-          label: Text(fileName)),
-    );
-    return Row(
-      mainAxisAlignment: align,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          isSelf ? [messageText, senderAvatar] : [senderAvatar, messageText],
-    );
-  }
-
-  _downloadFile(String fileUrl, fileName) {
-    HtmlDocument htmlDocument = document;
-    AnchorElement anchor = htmlDocument.createElement('a') as AnchorElement;
-    anchor.href = fileUrl;
-    anchor.style.display = fileName;
-    anchor.download = fileName;
-    document.body!.children.add(anchor);
-    anchor.click();
-    document.body!.children.remove(anchor);
   }
 
   /// RenderText is used to render message
@@ -453,11 +438,11 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     var b1 = data[1].toRadixString(16);
     var b2 = data[2].toRadixString(16);
     if (b0 == "42" && b1 == "4d") {
-      print("bmp");
+      common.logI("bmp");
     } else if (b0 == "ff" && b1 == "d8") {
-      print("jpg");
+      common.logI("jpg");
     } else if (b0 == "89" && b1 == "50" && b2 == "4e") {
-      print("png");
+      common.logI("png");
     }
     if (context.mounted) {
       showDialog<bool>(
