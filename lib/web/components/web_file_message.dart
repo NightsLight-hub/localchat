@@ -59,15 +59,13 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
               ? 'assets/images/avatarMan.jpg'
               : 'assets/images/avatarMan.jpg')),
     );
-    Container? progressIndicator;
+    ProgressIndicator? progressIndicator;
     if (msgProgressMap[widget.msg.msgId] != null) {
-      progressIndicator = Container(
-        margin: const EdgeInsets.only(top: 18.0),
-        child: CircularProgressIndicator(
-          backgroundColor: Colors.grey[200],
-          valueColor: const AlwaysStoppedAnimation(Colors.blue),
-          value: msgProgressMap[widget.msg.msgId],
-        ),
+      progressIndicator = CircularProgressIndicator(
+        backgroundColor: Colors.grey[200],
+        valueColor: const AlwaysStoppedAnimation(Colors.red),
+        strokeWidth: 1,
+        value: msgProgressMap[widget.msg.msgId],
       );
     }
 
@@ -82,7 +80,7 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
         child: Column(
           children: [
             FloatingActionButton.extended(
-                icon: const Icon(Icons.file_open),
+                icon: progressIndicator ?? const Icon(Icons.file_open),
                 tooltip: _tooltip(),
                 onPressed: () {
                   try {
@@ -99,14 +97,14 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widget.isSelf
           ? [
-              if (progressIndicator != null) progressIndicator,
+              // if (progressIndicator != null) progressIndicator,
               messageText,
               senderAvatar
             ]
           : [
               senderAvatar,
               messageText,
-              if (progressIndicator != null) progressIndicator,
+              // if (progressIndicator != null) progressIndicator,
             ],
     );
   }
