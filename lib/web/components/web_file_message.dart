@@ -83,10 +83,14 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
                 icon: progressIndicator ?? const Icon(Icons.file_open),
                 tooltip: _tooltip(),
                 onPressed: () {
-                  try {
-                    _downloadFile(fileUrl, fileName);
-                  } catch (e) {
-                    common.logE('download file $fileUrl failed, error: e');
+                  // if file is send by myself, click is useless.
+                  if (!widget.isSelf) {
+                    // if file is other user's, download it
+                    try {
+                      _downloadFile(fileUrl, fileName);
+                    } catch (e) {
+                      common.logE('download file $fileUrl failed, error: e');
+                    }
                   }
                 },
                 label: Text(fileName)),
@@ -96,16 +100,8 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
       mainAxisAlignment: align,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widget.isSelf
-          ? [
-              // if (progressIndicator != null) progressIndicator,
-              messageText,
-              senderAvatar
-            ]
-          : [
-              senderAvatar,
-              messageText,
-              // if (progressIndicator != null) progressIndicator,
-            ],
+          ? [messageText, senderAvatar]
+          : [senderAvatar, messageText],
     );
   }
 
