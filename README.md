@@ -15,6 +15,13 @@ fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
 
 * ide 用windows 设备启动main.dart
 
+## 调试开发
+web_main 读取 环境变量 `BUILD_MODE=debug` 从而能使用 localhost:8080 作为localChat服务器地址
+
+```shell
+flutter run -t lib/web/web_main.dart --dart-define=BUILD_MODE=debug
+```
+
 ## 一些命令
 ### code generate
 ```shell

@@ -12,7 +12,9 @@ main(List<String> args) {
   common.logI('currentUrl: $currentUrl');
   Uri uri = Uri.parse(currentUrl);
   common.address = 'http://${uri.host}:${uri.port}';
-  // common.address = 'http://localhost:8080'; // only used when debug
+  if (const String.fromEnvironment('BUILD_MODE') == 'debug') {
+    common.address = 'http://localhost:8080'; // only used when debug
+  }
   common.logI('server address: ${common.address}');
   connectWs(uri);
   runApp(const WebFramework());

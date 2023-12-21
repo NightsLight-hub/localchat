@@ -34,6 +34,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
   late TextEditingController _inputController;
   late ScrollController _scrollController;
   late FocusNode _textFocusNode;
+  late int textMaxLength;
   bool filePickerOpen = false;
   bool isEmojiShowing = false;
   bool isTextFiledClearButtonShowing = false;
@@ -45,6 +46,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     _textFocusNode = FocusNode();
     _inputController = TextEditingController();
     _scrollController = ScrollController();
+    int windowsWidth = window.innerWidth ?? 350;
+    textMaxLength = windowsWidth - 160;
     // _selectionController = TextSelectionControls();
   }
 
@@ -388,7 +391,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     // ]));
     var copyButton = Container(
       margin: const EdgeInsets.all(10.0),
-      constraints: const BoxConstraints(maxWidth: 600),
+      constraints: const BoxConstraints(maxWidth: 50),
       child: IconButton(
         icon: const Icon(Icons.copy),
         tooltip: '复制',
@@ -396,7 +399,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
           Clipboard.setData(ClipboardData(text: content)).then((_) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("已复制到剪贴板"),
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 1),
               backgroundColor: Color(0x202196f3),
               showCloseIcon: true,
             ));
@@ -406,7 +409,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
     var messageText = Container(
       margin: const EdgeInsets.all(5.0),
-      constraints: const BoxConstraints(maxWidth: 600),
+      constraints: BoxConstraints(maxWidth: textMaxLength.toDouble()),
       decoration: BoxDecoration(
         color: isSelf ? const Color(0xFF95EC69) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
@@ -414,8 +417,9 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       ),
       child: Text(
         content,
+        softWrap: true,
         style: const TextStyle(
-          fontSize: 20,
+          fontSize: 16,
         ),
       ),
     );
