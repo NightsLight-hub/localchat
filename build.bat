@@ -1,10 +1,10 @@
 @echo off
 
-@REM echo ====== build server ======
-@REM call fvm flutter build windows --release
-@REM
-@REM echo ====== build web ======
-@REM call fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
+echo ====== build server ======
+call fvm flutter build windows --release
+
+echo ====== build web ======
+call fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
 
 echo ====== copy web static resource ======
 rd /s/q build\windows\runner\Release\build\
