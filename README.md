@@ -8,12 +8,20 @@ localchat
 
 ## 构建方法
 
+* 全部构建
+```shell
+build.bat
+```
+
 * web静态资源构建 
 ```shell
 fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
 ```
 
-* ide 用windows 设备启动main.dart
+* server 构建
+```shell
+fvm flutter build windows --release
+```
 
 ## 调试开发
 web_main 读取 环境变量 `BUILD_MODE=debug` 从而能使用 localhost:8080 作为localChat服务器地址
