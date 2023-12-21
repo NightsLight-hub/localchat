@@ -240,7 +240,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     ref.read(messagesNotifierProvider.notifier).add(message);
     Uri uri = Uri.parse('${common.address}/${utils.ossApiPath()}');
     try {
-      if (file.size > 1024 * 1024 * 10) {
+      if (file.size > 1024 * 1024) {
         // segmented upload
         common.logI('${file.name} is ${(file.size / 1024 / 1024).floor()}MB');
         headerMap['file-total-length'] = file.size.toString();
