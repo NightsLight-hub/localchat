@@ -381,17 +381,9 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
           image:
               AssetImage(isSelf ? 'assets/images/avatarMan.jpg' : fellowAvtar)),
     );
-    // var senderName = Text.rich(TextSpan(children: [
-    //   TextSpan(
-    //     text: isSelf ? '  $name' : '$name  ',
-    //     style: const TextStyle(
-    //       fontWeight: FontWeight.bold,
-    //     ),
-    //   ),
-    // ]));
     var copyButton = Container(
-      margin: const EdgeInsets.all(10.0),
-      constraints: const BoxConstraints(maxWidth: 50),
+      // margin: const EdgeInsets.only(top: 10.0),
+      constraints: const BoxConstraints(maxWidth: 30),
       child: IconButton(
         icon: const Icon(Icons.copy),
         tooltip: '复制',
@@ -413,7 +405,6 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       decoration: BoxDecoration(
         color: isSelf ? const Color(0xFF95EC69) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        border: Border.all(width: 8, color: Colors.white),
       ),
       child: Text(
         content,

@@ -91,7 +91,10 @@ class FileMessageState extends ConsumerState<FileMessage> {
                   'Cannot open file because filepath is empty, maybe some bug happened');
             }
           },
-          label: Text(fileName)),
+          label: Text(
+            fileName,
+            overflow: TextOverflow.ellipsis,
+          )),
     );
     return Row(
       mainAxisAlignment: align,
