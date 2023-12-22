@@ -17,13 +17,10 @@ class WebSocketService {
 
   WebSocketService._internal();
 
-  Map<String, $websocket.WebSocketChannel> addressChannelMap = {};
-  Map<String, String> userAddressMap = {};
+  Map<String, $websocket.WebSocketChannel> userChannelMap = {};
 
   addChannel(Request request, $websocket.WebSocketChannel channel) {
     // every client will connect to the server using websocket.
-    String address = '${request.url.host}:${request.url.port}';
-    addressChannelMap[address] = channel;
     channel.stream.listen((message) {
       logger.t('message: $message');
       try {
@@ -32,7 +29,7 @@ class WebSocketService {
         switch (wsMsg.type) {
           case WsMsgType.registerUser:
             var userModel = UserModelData.fromJson(jsonDecode(wsMsg.body));
-            userAddressMap[userModel.userId] = address;
+            userChannelMap[userModel.userId] = channel;
             logger.i('add user ${userModel.nickName}, id ${userModel.userId}');
             utils
                 .getMainRef()
@@ -51,15 +48,15 @@ class WebSocketService {
         logger.e(e);
       }
     }, onError: (error) {
-      logger.e(
-          'listen websocket $address channel error: $error, reason: ${channel.closeReason}');
-      addressChannelMap.remove(address);
+      logger.e('error: $error');
+    }, onDone: () {
+      logger.e('$channel done');
     });
   }
 
   _processMessage(MessageModelData msgModel, String rawWsMsg) {
     utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
-    for (var user in userAddressMap.keys) {
+    for (var user in userChannelMap.keys) {
       if (msgModel.senderID == user) {
         continue;
       }
@@ -68,14 +65,9 @@ class WebSocketService {
   }
 
   sendToUser(String userId, String msg) {
-    var address = userAddressMap[userId];
-    if (address == null) {
-      logger.e('user $userId not found');
-      return;
-    }
-    var channel = addressChannelMap[address];
+    var channel = userChannelMap[userId];
     if (channel == null) {
-      logger.e('websocket channel from $address not exist');
+      logger.e('websocket channel from $userId not exist');
       return;
     }
     channel.sink.add(msg);
@@ -83,7 +75,7 @@ class WebSocketService {
   }
 
   sendMessage(MessageModelData message) {
-    for (var ent in addressChannelMap.entries) {
+    for (var ent in userChannelMap.entries) {
       logger.i('send msg to ${ent.key}');
       ent.value.sink.add(jsonEncode(WebsocketMessage.sendMessage(message)));
     }
