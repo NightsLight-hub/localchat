@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:localchat/http/websocket_message.dart';
 import 'package:localchat/logger.dart';
-import 'package:localchat/models/common.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
 import 'package:shelf/shelf.dart';
@@ -34,6 +33,7 @@ class WebSocketService {
           case WsMsgType.registerUser:
             var userModel = UserModelData.fromJson(jsonDecode(wsMsg.body));
             userAddressMap[userModel.userId] = address;
+            logger.i('add user ${userModel.nickName}, id ${userModel.userId}');
             utils
                 .getMainRef()
                 .read(usersNotifierProvider.notifier)
@@ -41,7 +41,7 @@ class WebSocketService {
             break;
           case WsMsgType.sendMessage:
             var msgModel = MessageModelData.fromJson(jsonDecode(wsMsg.body));
-            _processMessage(msgModel);
+            _processMessage(msgModel, message);
             break;
           default:
             logger.i('unknown websocket message: $message');
@@ -54,20 +54,17 @@ class WebSocketService {
       logger.e(
           'listen websocket $address channel error: $error, reason: ${channel.closeReason}');
       addressChannelMap.remove(address);
-    }, onDone: () {
-      logger.e(
-          'listen websocket $address channel done, reason: ${channel.closeReason}');
-      addressChannelMap.remove(address);
     });
   }
 
-  _processMessage(MessageModelData msgModel) {
-    if (msgModel.contentType == ContentType.file.value) {
-      utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
-    } else if (msgModel.contentType == ContentType.text.value) {
-      utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
+  _processMessage(MessageModelData msgModel, String rawWsMsg) {
+    utils.getMainRef().read(messagesNotifierProvider.notifier).add(msgModel);
+    for (var user in userAddressMap.keys) {
+      if (msgModel.senderID == user) {
+        continue;
+      }
+      sendToUser(user, rawWsMsg);
     }
-    // todo  broadcast this message
   }
 
   sendToUser(String userId, String msg) {
@@ -82,11 +79,13 @@ class WebSocketService {
       return;
     }
     channel.sink.add(msg);
+    logger.i('send msg to $userId');
   }
 
   sendMessage(MessageModelData message) {
-    for (var channel in addressChannelMap.values) {
-      channel.sink.add(jsonEncode(WebsocketMessage.sendMessage(message)));
+    for (var ent in addressChannelMap.entries) {
+      logger.i('send msg to ${ent.key}');
+      ent.value.sink.add(jsonEncode(WebsocketMessage.sendMessage(message)));
     }
   }
 }

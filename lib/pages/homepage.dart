@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/gen/strings.g.dart';
 import 'package:localchat/pages/chat/chat_page.dart';
-import 'package:localchat/pages/network/network_page.dart';
 import 'package:localchat/pages/settings/settings_page.dart';
 import 'package:localchat/utils.dart' as utils;
 
 enum HomeTab {
-  network(Icons.wifi),
+  // network(Icons.wifi),
   chat(Icons.send),
 
   settings(Icons.settings);
@@ -18,8 +17,8 @@ enum HomeTab {
 
   String get label {
     switch (this) {
-      case HomeTab.network:
-        return t.networkTab.title;
+      // case HomeTab.network:
+      //   return t.networkTab.title;
       case HomeTab.chat:
         return t.chatTab.title;
       case HomeTab.settings:
@@ -31,7 +30,7 @@ enum HomeTab {
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
-  final HomeTab initialTab = HomeTab.network;
+  final HomeTab initialTab = HomeTab.chat;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
@@ -41,7 +40,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class HomePageState extends ConsumerState<HomePage> {
   late PageController _pageController;
-  HomeTab _currentTab = HomeTab.network;
+  late HomeTab _currentTab;
 
   @override
   void initState() {
@@ -74,12 +73,6 @@ class HomePageState extends ConsumerState<HomePage> {
             leading: const Column(
               children: [
                 SizedBox(height: 20),
-                Text(
-                  '本地聊天（囧）',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
               ],
             ),
             destinations: HomeTab.values.map((tab) {
@@ -98,7 +91,7 @@ class HomePageState extends ConsumerState<HomePage> {
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: const [
-                      NetworkPage(),
+                      // NetworkPage(),
                       ChatPage(),
                       SettingsPage(),
                     ],
@@ -109,16 +102,6 @@ class HomePageState extends ConsumerState<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: false
-          ? NavigationBar(
-              selectedIndex: _currentTab.index,
-              onDestinationSelected: _goToPage,
-              destinations: HomeTab.values.map((tab) {
-                return NavigationDestination(
-                    icon: Icon(tab.icon), label: tab.label);
-              }).toList(),
-            )
-          : null,
     );
   }
 }

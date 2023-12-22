@@ -1,7 +1,7 @@
 // SessionMessageBox 是消息展示区域
 import 'dart:convert';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emojiPicker;
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
@@ -15,6 +15,7 @@ import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/oss/oss_service.dart';
 import 'package:localchat/pages/chat/FileMessage.dart';
 import 'package:localchat/state/messages_state.dart';
+import 'package:localchat/utils.dart' as utils;
 import 'package:pasteboard/pasteboard.dart';
 
 class ConversationMessageBox extends ConsumerStatefulWidget {
@@ -160,9 +161,9 @@ class ConversationMessageBoxState
           child: SizedBox(
             height: 250,
             // width: 500,
-            child: emojiPicker.EmojiPicker(
-                onEmojiSelected:
-                    (emojiPicker.Category? category, emojiPicker.Emoji emoji) {
+            child: emoji_picker.EmojiPicker(
+                onEmojiSelected: (emoji_picker.Category? category,
+                    emoji_picker.Emoji emoji) {
                   // Do something when emoji is tapped (optional)
                   _inputController.text += emoji.emoji;
                 },
@@ -175,7 +176,7 @@ class ConversationMessageBoxState
                     ..selection = TextSelection.fromPosition(
                         TextPosition(offset: _inputController.text.length));
                 },
-                config: emojiPicker.Config(
+                config: emoji_picker.Config(
                   columns: 7,
                   emojiSizeMax: 32 *
                       (foundation.defaultTargetPlatform == TargetPlatform.iOS
@@ -184,7 +185,7 @@ class ConversationMessageBoxState
                   verticalSpacing: 0,
                   horizontalSpacing: 0,
                   gridPadding: EdgeInsets.zero,
-                  initCategory: emojiPicker.Category.RECENT,
+                  initCategory: emoji_picker.Category.RECENT,
                   bgColor: const Color(0xFFF2F2F2),
                   indicatorColor: Colors.blue,
                   iconColor: Colors.grey,
@@ -193,7 +194,7 @@ class ConversationMessageBoxState
                   skinToneDialogBgColor: Colors.white,
                   skinToneIndicatorColor: Colors.grey,
                   enableSkinTones: true,
-                  recentTabBehavior: emojiPicker.RecentTabBehavior.RECENT,
+                  recentTabBehavior: emoji_picker.RecentTabBehavior.RECENT,
                   recentsLimit: 28,
                   noRecents: const Text(
                     'No Recents',
@@ -203,8 +204,8 @@ class ConversationMessageBoxState
                   loadingIndicator:
                       const SizedBox.shrink(), // Needs to be const Widget
                   tabIndicatorAnimDuration: kTabScrollDuration,
-                  categoryIcons: const emojiPicker.CategoryIcons(),
-                  buttonMode: emojiPicker.ButtonMode.MATERIAL,
+                  categoryIcons: const emoji_picker.CategoryIcons(),
+                  buttonMode: emoji_picker.ButtonMode.MATERIAL,
                 )),
           ),
         ),
@@ -317,12 +318,16 @@ class ConversationMessageBoxState
         tooltip: '复制',
         onPressed: () {
           Clipboard.setData(ClipboardData(text: content)).then((_) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("已复制到剪贴板"),
-              duration: Duration(seconds: 2),
-              backgroundColor: Color(0x202196f3),
-              showCloseIcon: true,
-            ));
+            utils.showSnackBar(
+                context,
+                const Center(
+                    child: Text(
+                  "已复制聊天内容",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal),
+                )));
           });
         },
       ),
@@ -337,9 +342,7 @@ class ConversationMessageBoxState
       ),
       child: Text(
         content,
-        style: const TextStyle(
-          fontSize: 20,
-        ),
+        style: const TextStyle(fontSize: 20),
       ),
     );
     return Row(

@@ -19,7 +19,6 @@ import 'package:localchat/web/components/web_file_message.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart' as p;
 
 class WebConversationMsgBox extends ConsumerStatefulWidget {
   const WebConversationMsgBox({Key? key}) : super(key: key);
@@ -389,12 +388,16 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
         tooltip: '复制',
         onPressed: () {
           Clipboard.setData(ClipboardData(text: content)).then((_) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("已复制到剪贴板"),
-              duration: Duration(seconds: 1),
-              backgroundColor: Color(0x202196f3),
-              showCloseIcon: true,
-            ));
+            utils.showSnackBar(
+                context,
+                const Center(
+                    child: Text(
+                  "已复制聊天内容",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue,
+                  ),
+                )));
           });
         },
       ),

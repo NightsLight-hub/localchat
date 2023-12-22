@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as p;
@@ -41,4 +42,21 @@ String getDownloadPath({String? filename}) {
 
 String ossApiPath() {
   return 'api/v1/file';
+}
+
+showSnackBar(BuildContext context, Widget contentWidget, {int width = 400}) {
+  var h = MediaQuery.of(context).size.height;
+  var w = MediaQuery.of(context).size.width;
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: contentWidget,
+    duration: const Duration(seconds: 1),
+    backgroundColor: const Color(0x202196f3),
+    behavior: SnackBarBehavior.floating,
+    margin: EdgeInsets.only(
+      bottom: h - 40,
+      left: w > width ? (w - width) / 2 : 0,
+      right: w > width ? (w - width) / 2 : 0,
+    ),
+    showCloseIcon: true,
+  ));
 }

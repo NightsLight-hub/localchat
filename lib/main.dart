@@ -44,7 +44,7 @@ class MainFrameworkState extends ConsumerState<MainFramework> {
     return ProviderScope(
         child: TranslationProvider(
             child: const MaterialApp(
-      title: '本地聊天',
+      title: 'LocalChat',
       home: HomePage(),
     )));
   }

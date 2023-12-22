@@ -1,62 +1,62 @@
 # localchat
 
-localchat
+Instant chats with other people on local network by sharing text and files.
 
 ## Getting Started
+Download Release from [Release](https://github.com/NightsLight-hub/localchat/releases), 
+decompress it and then run `localchat.exe` on Windows.
+![](docs/images/network_page1.png)
+Congratulations, you are now the host of a local chat room.
+Anyone who wants to join the chat room can choose to scan the QR code on the right
+, or just open the URL below the QR code using a browser(on your pc or **phone**)
 
-构建一个用于局域网内发送文字和文件的工具，以聊天的方式。。。
+![](docs/images/web_chat_page1.png)
+Submit nickName, and then enjoy the chat!
 
-## 构建方法
+## Development
+### First of all, use FVM
+we use fvm to manage flutter version, so you should install [fvm](https://fvm.app/docs/getting_started/overview) first.
 
-* 全部构建
+### My flutter version info
+```
+fvm flutter --version
+Flutter 3.13.8 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 6c4930c4ac (9 weeks ago) • 2023-10-18 10:57:55 -0500
+Engine • revision 767d8c75e8
+Tools • Dart 3.1.4 • DevTools 2.25.0
+```
+
+### Build 
+Build the release package from code by using `build.bat`
+
 ```shell
 build.bat
 ```
 
-* web静态资源构建 
+### Or just build web 
 ```shell
 fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
 ```
 
-* server 构建
+### Or just build server
 ```shell
 fvm flutter build windows --release
 ```
 
-## 调试开发
-web_main 读取 环境变量 `BUILD_MODE=debug` 从而能使用 localhost:8080 作为localChat服务器地址
+## debug
+During development, both the front-end and back-end start independently, 
+so the front-end cannot directly use window.host.href as the server address.
 
-```shell
-flutter run -t lib/web/web_main.dart --dart-define=BUILD_MODE=debug
-```
+we can set the environment variable `BUILD_MODE=debug` to tell the front-end 
+to use localhost:8080 as the server address.
 
-## 一些命令
-### code generate
-```shell
-fvm dart pub run build_runner build
-```
-
-### build web
-```shell
-fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
-```
-
-### 短期规划
-* [ ] 断线重连，用户重新注册逻辑。
-* [x] desktop发送文件
-* [x] 文件消息下载、打开（desktop和web都已完成）
-* [x] web端文件上传
-* [ ] 消息广播 -- 研发中
-* [x] 分段上传
-* [ ] 上传失败的消息展示
-* [ ] 发布包构建脚本
-* [ ] 体验性问题
-  * [ ] 消息双击不能全选， 期待是 双击全选+复制
-  * [x] 点击空白处，选择的消息不能取消选择
-  * [ ] 图片粘贴发送 及 渲染
-  * [ ] 手机端页面，键盘会盖住下面的消息
-  
-
+# development plan
+* [ ] Disconnect and reconnect, user re register logic.
+* [x] Desktop sends files
+* [x] File message download and opening (both desktop and web have been completed)
+* [x] Web side file upload
+* [ ] Message broadcast - under development
+* [x] Segmented upload
 
 # 感谢
-受到 [localsend](https://github.com/localsend/localsend) 的启发
+inspired by [localsend](https://github.com/localsend/localsend)
