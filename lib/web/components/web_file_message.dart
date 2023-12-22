@@ -96,8 +96,9 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
                   }
                 }
               },
-              label: SizedBox(
-                width: textMaxLength.toDouble() - 50,
+              label: Container(
+                constraints:
+                    BoxConstraints(maxWidth: textMaxLength.toDouble() - 50),
                 child: Text(
                   fileName,
                   style: const TextStyle(fontSize: 14),

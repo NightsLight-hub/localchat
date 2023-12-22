@@ -35,7 +35,7 @@ build.bat
 
 ### Or just build web 
 ```shell
-fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart
+fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart --web-renderer html
 ```
 
 ### Or just build server
