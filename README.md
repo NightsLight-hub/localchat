@@ -51,6 +51,10 @@ we can set the environment variable `BUILD_MODE=debug` to tell the front-end
 to use localhost:8080 as the server address.
 
 # development plan
+* [ ] chat room password 
+* [ ] image message will be rendered on conversation page
+* [ ] multiple file upload
+* [ ] pc chats
 * [ ] Disconnect and reconnect, user re register logic.
 * [x] Desktop sends files
 * [x] File message download and opening (both desktop and web have been completed)

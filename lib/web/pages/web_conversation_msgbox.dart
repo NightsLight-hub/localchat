@@ -373,7 +373,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     String fellowAvtar = 'assets/images/avatarMan.jpg';
     var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
     var senderAvatar = Container(
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(5),
       child: Image(
           width: 50,
           height: 50,
@@ -381,8 +381,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
               AssetImage(isSelf ? 'assets/images/avatarMan.jpg' : fellowAvtar)),
     );
     var copyButton = Container(
-      // margin: const EdgeInsets.only(top: 10.0),
       constraints: const BoxConstraints(maxWidth: 30),
+      margin: const EdgeInsets.only(left: 5, right: 5),
       child: IconButton(
         icon: const Icon(Icons.copy),
         tooltip: '复制',
@@ -395,22 +395,30 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                   "已复制聊天内容",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.blue,
+                    color: Colors.black,
                   ),
                 )));
           });
         },
       ),
     );
+    const messageBackgroundColor = Colors.lightGreenAccent;
     var messageText = Container(
-      margin: const EdgeInsets.all(5.0),
       constraints: BoxConstraints(maxWidth: textMaxLength.toDouble()),
-      decoration: BoxDecoration(
-        color: isSelf ? const Color(0xFF95EC69) : null,
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+      decoration: const ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(width: 1, color: messageBackgroundColor),
+          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        ),
+        shadows: [
+          BoxShadow(
+            color: messageBackgroundColor,
+            blurRadius: 5.0,
+          ),
+        ],
       ),
       child: Text(
-        content,
+        ' $content ',
         softWrap: true,
         style: const TextStyle(
           fontSize: 16,
@@ -419,7 +427,7 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
     return Row(
       mainAxisAlignment: align,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: isSelf
           ? [copyButton, messageText, senderAvatar]
           : [senderAvatar, messageText, copyButton],

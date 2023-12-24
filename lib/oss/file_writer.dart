@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -14,8 +15,11 @@ class FileWriter {
   final Map<String, IOSink?> _fdMap = {};
   final Map<String, int?> _fSizeMap = {};
 
-  IOSink getOrCreateFd(String filePath) {
-    return _fdMap[filePath] ?? _createFd(filePath);
+  IOSink? getFd(String filePath, {bool createIfNotExist = false}) {
+    if (_fdMap[filePath] == null && createIfNotExist) {
+      return _createFd(filePath);
+    }
+    return _fdMap[filePath];
   }
 
   IOSink _createFd(String filePath) {
@@ -31,7 +35,7 @@ class FileWriter {
   }
 
   writeSync(String filePath, Uint8List data) {
-    getOrCreateFd(filePath).add(data);
+    getFd(filePath, createIfNotExist: true)!.add(data);
     _fSizeMap[filePath] = _fSizeMap[filePath]! + data.length;
   }
 
@@ -40,8 +44,8 @@ class FileWriter {
   }
 
   flush(String filePath) async {
-    await getOrCreateFd(filePath).flush();
-    await getOrCreateFd(filePath).close();
+    await getFd(filePath)?.flush();
+    await getFd(filePath)?.close();
     _fdMap[filePath] = null;
     _fSizeMap[filePath] = null;
   }

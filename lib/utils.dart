@@ -50,7 +50,7 @@ showSnackBar(BuildContext context, Widget contentWidget, {int width = 400}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: contentWidget,
     duration: const Duration(seconds: 1),
-    backgroundColor: const Color(0x202196f3),
+    backgroundColor: Colors.white30.withOpacity(0.4),
     behavior: SnackBarBehavior.floating,
     margin: EdgeInsets.only(
       bottom: h - 40,
