@@ -311,7 +311,6 @@ class ConversationMessageBoxState
       ),
     ]));
     var copyButton = Container(
-      margin: const EdgeInsets.only(top: 10.0),
       constraints: const BoxConstraints(maxWidth: 600),
       child: IconButton(
         icon: const Icon(Icons.copy),
@@ -332,22 +331,29 @@ class ConversationMessageBoxState
         },
       ),
     );
+    const messageBackgroundColor = Colors.white12;
     var messageText = Container(
-      margin: const EdgeInsets.only(top: 5.0),
       constraints: const BoxConstraints(maxWidth: 600),
-      decoration: BoxDecoration(
-        color: const Color(0xFF95EC69),
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        border: Border.all(width: 8, color: Colors.white),
+      decoration: const ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: messageBackgroundColor, width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+        shadows: [
+          BoxShadow(
+            color: messageBackgroundColor,
+            blurRadius: 10.0,
+          ),
+        ],
       ),
       child: Text(
-        content,
+        '  $content  ',
         style: const TextStyle(fontSize: 20),
       ),
     );
     return Row(
       mainAxisAlignment: align,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: isSelf
           ? [copyButton, messageText, senderAvatar]
           : [senderAvatar, messageText, copyButton],

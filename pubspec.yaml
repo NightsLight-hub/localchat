@@ -62,6 +62,7 @@ dependencies:
   string_scanner: ^1.2.0
   convert: ^3.1.1
   emoji_picker_flutter: ^1.6.3
+  adaptive_theme: ^3.4.1
 
 dev_dependencies:
   flutter_test:

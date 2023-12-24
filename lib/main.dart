@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/database/db_controller.dart';
@@ -43,9 +44,16 @@ class MainFrameworkState extends ConsumerState<MainFramework> {
   Widget build(BuildContext context) {
     return ProviderScope(
         child: TranslationProvider(
-            child: const MaterialApp(
-      title: 'LocalChat',
-      home: HomePage(),
+            child: AdaptiveTheme(
+      light: ThemeData.light(useMaterial3: true),
+      dark: ThemeData.dark(useMaterial3: true),
+      initial: AdaptiveThemeMode.dark,
+      builder: (theme, darkTheme) => MaterialApp(
+        title: 'LocalChat',
+        theme: theme,
+        darkTheme: darkTheme,
+        home: const HomePage(),
+      ),
     )));
   }
 }

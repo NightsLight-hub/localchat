@@ -138,6 +138,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
               child: Center(
                 child: PrettyQr(
                   size: 180,
+                  elementColor: Colors.white54,
                   errorCorrectLevel: QrErrorCorrectLevel.Q,
                   // elementColor: Theme.of(context).colorScheme.onSurface,
                   data: chatServerUrl,
@@ -209,7 +210,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
     return Expanded(
         child: Container(
             padding: const EdgeInsets.all(5.0),
-            decoration: const BoxDecoration(color: Colors.white),
+            // decoration: const BoxDecoration(color: Colors.white),
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
