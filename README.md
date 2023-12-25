@@ -5,12 +5,15 @@ Instant chats with other people on local network by sharing text and files.
 ## Getting Started
 Download Release from [Release](https://github.com/NightsLight-hub/localchat/releases), 
 decompress it and then run `localchat.exe` on Windows.
-![](docs/images/network_page1.png)
+
+<img height="500" src="docs/images/network_page1.png"/>
+
 Congratulations, you are now the host of a local chat room.
 Anyone who wants to join the chat room can choose to scan the QR code on the right
 , or just open the URL below the QR code using a browser(on your pc or **phone**)
 
-![](docs/images/web_chat_page1.png)
+<img height="500" src="docs/images/web_chat_page1.png"/>
+
 Submit nickName, and then enjoy the chat!
 
 ## Development

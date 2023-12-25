@@ -338,13 +338,18 @@ class ConversationMessageBoxState
         },
       ),
     );
-    const messageBackgroundColor = Colors.white12;
+    Color messageBackgroundColor;
+    if (Theme.of(context).brightness == Brightness.dark) {
+      messageBackgroundColor = Colors.white24;
+    } else {
+      messageBackgroundColor = Colors.lightGreenAccent;
+    }
     var messageText = Container(
       constraints: const BoxConstraints(maxWidth: 600),
-      decoration: const ShapeDecoration(
+      decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           side: BorderSide(color: messageBackgroundColor, width: 1),
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         ),
         shadows: [
           BoxShadow(

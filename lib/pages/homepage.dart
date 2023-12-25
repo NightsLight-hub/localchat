@@ -1,9 +1,12 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/gen/strings.g.dart';
+import 'package:localchat/logger.dart';
 import 'package:localchat/pages/chat/chat_page.dart';
 import 'package:localchat/pages/settings/settings_page.dart';
 import 'package:localchat/utils.dart' as utils;
+import 'package:theme_button/theme_button.dart';
 
 enum HomeTab {
   // network(Icons.wifi),
@@ -75,6 +78,23 @@ class HomePageState extends ConsumerState<HomePage> {
                 SizedBox(height: 20),
               ],
             ),
+            trailing: Expanded(
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                ThemeButton(
+                  width: 50,
+                  height: 50,
+                  onChanged: (value) {
+                    logger.d('change theme');
+                    AdaptiveTheme.of(context).toggleThemeMode(useSystem: false);
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ]),
+            ),
+
             destinations: HomeTab.values.map((tab) {
               return NavigationRailDestination(
                 icon: Icon(tab.icon),

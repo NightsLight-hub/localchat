@@ -129,6 +129,12 @@ class ChatPageState extends ConsumerState<ChatPage> {
         });
       }
     }
+    Color qrColor;
+    if (Theme.of(context).brightness == Brightness.dark) {
+      qrColor = Colors.white54;
+    } else {
+      qrColor = Colors.black87;
+    }
     return SearchAnchor(
       searchController: _searchController,
       builder: (BuildContext context, SearchController controller) {
@@ -138,10 +144,11 @@ class ChatPageState extends ConsumerState<ChatPage> {
               child: Center(
                 child: PrettyQr(
                   size: 180,
-                  elementColor: Colors.white54,
+                  elementColor: qrColor,
                   errorCorrectLevel: QrErrorCorrectLevel.Q,
                   // elementColor: Theme.of(context).colorScheme.onSurface,
                   data: chatServerUrl,
+                  roundEdges: true,
                 ),
               )),
           onTap: () {

@@ -9,7 +9,7 @@ import 'package:localchat/http/router.dart' as router;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-
+import 'utils.dart' as utils;
 import 'logger.dart';
 import 'pages/homepage.dart';
 
@@ -45,8 +45,8 @@ class MainFrameworkState extends ConsumerState<MainFramework> {
     return ProviderScope(
         child: TranslationProvider(
             child: AdaptiveTheme(
-      light: ThemeData.light(useMaterial3: true),
-      dark: ThemeData.dark(useMaterial3: true),
+      light: utils.lightTheme(),
+      dark: utils.darkTheme(),
       initial: AdaptiveThemeMode.dark,
       builder: (theme, darkTheme) => MaterialApp(
         title: 'LocalChat',

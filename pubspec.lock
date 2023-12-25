@@ -41,6 +41,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.2"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      sha256: "7b875fd4a20b165a3084bd2d210439b22ebc653f21cea4842729c0c30c82596b"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.4.9"
   args:
     dependency: transitive
     description:
@@ -536,6 +544,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.2.0"
+  lottie:
+    dependency: transitive
+    description:
+      name: lottie
+      sha256: a93542cc2d60a7057255405f62252533f8e8956e7e06754955669fd32fb4b216
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.7.0"
   matcher:
     dependency: transitive
     description:
@@ -989,6 +1005,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.6.1"
+  theme_button:
+    dependency: "direct main"
+    description:
+      name: theme_button
+      sha256: "28f8a93d8de33b1c1b4538e51412476b320a67783a55e1bddb267ba42eb5a12b"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.4"
   time:
     dependency: transitive
     description:

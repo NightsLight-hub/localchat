@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/http/websocket_message.dart';
-import 'package:localchat/models/common.dart';
 import 'package:localchat/models/common.dart' as common_model;
+import 'package:localchat/models/common.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
@@ -402,13 +402,18 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
         },
       ),
     );
-    const messageBackgroundColor = Colors.lightGreenAccent;
+    Color messageBackgroundColor;
+    if (Theme.of(context).brightness == Brightness.dark) {
+      messageBackgroundColor = Colors.white24;
+    } else {
+      messageBackgroundColor = Colors.lightGreenAccent;
+    }
     var messageText = Container(
       constraints: BoxConstraints(maxWidth: textMaxLength.toDouble()),
-      decoration: const ShapeDecoration(
+      decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           side: BorderSide(width: 1, color: messageBackgroundColor),
-          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         ),
         shadows: [
           BoxShadow(

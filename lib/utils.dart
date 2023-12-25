@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
+
+// Define various tool functions that can be used on both desktop and web.
 
 late WidgetRef _mainRef;
 
@@ -59,4 +61,15 @@ showSnackBar(BuildContext context, Widget contentWidget, {int width = 400}) {
     ),
     showCloseIcon: true,
   ));
+}
+
+var _darkTheme = ThemeData.dark(useMaterial3: true).copyWith();
+var _lightTheme = ThemeData.light(useMaterial3: true).copyWith();
+
+ThemeData darkTheme() {
+  return _darkTheme;
+}
+
+ThemeData lightTheme() {
+  return _lightTheme;
 }
