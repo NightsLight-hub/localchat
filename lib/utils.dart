@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 // Define various tool functions that can be used on both desktop and web.
+
+int _readStreamChunkSize = 1 * 1024 * 1024;
 
 late WidgetRef _mainRef;
 
@@ -52,15 +55,28 @@ showSnackBar(BuildContext context, Widget contentWidget, {int width = 400}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: contentWidget,
     duration: const Duration(seconds: 1),
-    backgroundColor: Colors.white30.withOpacity(0.4),
     behavior: SnackBarBehavior.floating,
     margin: EdgeInsets.only(
-      bottom: h - 40,
+      bottom: h - 80,
       left: w > width ? (w - width) / 2 : 0,
       right: w > width ? (w - width) / 2 : 0,
     ),
     showCloseIcon: true,
   ));
+}
+
+Stream<List<int>> openFileReadStream(XFile file) async* {
+  int start = 0;
+  final fileSize = await file.length();
+  while (start < fileSize) {
+    final end = start + _readStreamChunkSize > fileSize
+        ? fileSize
+        : start + _readStreamChunkSize;
+    final blob = file.openRead(start, end);
+    final result = await blob.first;
+    yield result;
+    start += _readStreamChunkSize;
+  }
 }
 
 var _darkTheme = ThemeData.dark(useMaterial3: true).copyWith();

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:html';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -16,12 +17,13 @@ import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
 import 'package:localchat/web/components/web_file_message.dart';
+import 'package:localchat/web/components/web_text_message.dart';
 import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 import 'package:pasteboard/pasteboard.dart';
 
 class WebConversationMsgBox extends ConsumerStatefulWidget {
-  const WebConversationMsgBox({Key? key}) : super(key: key);
+  const WebConversationMsgBox({super.key});
 
   @override
   ConsumerState<WebConversationMsgBox> createState() {
@@ -81,18 +83,28 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
 
   Widget _buildMessageShowWidget(List<String> renderMessages) {
     _scrollToBottom();
-    return Expanded(
-        child: ListView.builder(
-      shrinkWrap: false,
-      addAutomaticKeepAlives: true,
-      padding: const EdgeInsets.all(10),
-      controller: _scrollController,
-      itemCount: renderMessages.length,
-      itemBuilder: (context, index) {
-        var msg = getMsg(renderMessages[index])!;
-        return renderMessage(msg, isSelf: msg.senderID == common.selfId);
-      },
-    ));
+    // drag and drop widget
+    return DropTarget(
+        onDragDone: (detail) async {
+          for (var file in detail.files) {
+            var fileSize = await file.length();
+            var fileStream = utils.openFileReadStream(file);
+            common.logD('drag file result: ${file.name}, size: $fileSize');
+            _sendFile(file.name, fileSize, fileStream);
+          }
+        },
+        child: Expanded(
+            child: ListView.builder(
+          shrinkWrap: false,
+          addAutomaticKeepAlives: true,
+          padding: const EdgeInsets.all(10),
+          controller: _scrollController,
+          itemCount: renderMessages.length,
+          itemBuilder: (context, index) {
+            var msg = getMsg(renderMessages[index])!;
+            return renderMessage(msg, isSelf: msg.senderID == common.selfId);
+          },
+        )));
   }
 
   Column _buildMessageInputRow(BuildContext context) {
@@ -124,8 +136,23 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                             )
                           : const Text(""),
                       IconButton(
-                          tooltip: '发送图片',
-                          onPressed: _sendFile,
+                          tooltip: '发送文件',
+                          onPressed: () async {
+                            if (filePickerOpen) {
+                              return;
+                            }
+                            filePickerOpen = true;
+                            FilePickerResult? result = await FilePicker.platform
+                                .pickFiles(
+                                    withData: false, withReadStream: true);
+                            filePickerOpen = false;
+                            if (result == null || result.files.isEmpty) {
+                              return;
+                            }
+                            common.logD('filePicker result: $result');
+                            var file = result.files.first;
+                            _sendFile(file.name, file.size, file.readStream!);
+                          },
                           color: _inputIconColor,
                           icon: const Icon(Icons.file_upload)),
                       IconButton(
@@ -214,20 +241,8 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     );
   }
 
-  _sendFile() async {
-    if (filePickerOpen) {
-      return;
-    }
-    filePickerOpen = true;
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(withData: false, withReadStream: true);
-    filePickerOpen = false;
-    if (result == null || result.files.isEmpty) {
-      return;
-    }
-    common.logD('filePicker result: $result');
-    var file = result.files.first;
-    var message = MessageModelData.file(file.name,
+  _sendFile(String filename, int fileSize, Stream<List<int>> fileStream) async {
+    var message = MessageModelData.file(filename,
         senderNickname: common.getUserModelData()!.nickName,
         senderPlatformID: common_model.Platform.web.value,
         senderID: common.getUserModelData()!.userId);
@@ -239,22 +254,22 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     ref.read(messagesNotifierProvider.notifier).add(message);
     Uri uri = Uri.parse('${common.address}/${utils.ossApiPath()}');
     try {
-      if (file.size > 1024 * 1024) {
+      if (fileSize > 1024 * 1024) {
         // segmented upload
-        common.logI('${file.name} is ${(file.size / 1024 / 1024).floor()}MB');
-        headerMap['file-total-length'] = file.size.toString();
+        common.logI('$filename is ${(fileSize / 1024 / 1024).floor()}MB');
+        headerMap['file-total-length'] = fileSize.toString();
         int i = -1;
         int sendLength = 0;
-        await for (var data in file.readStream!) {
+        await for (var data in fileStream) {
           sendLength += data.length;
-          var progress = (sendLength * 100 / file.size).ceilToDouble() / 100;
+          var progress = (sendLength * 100 / fileSize).ceilToDouble() / 100;
           MultipartFile multipartFile =
-              MultipartFile.fromBytes(data, filename: file.name);
+              MultipartFile.fromBytes(data, filename: filename);
           headerMap['file-segment-index'] = (i++).toString();
-          common.logD(
-              'upload file ${file.name} -- $i, progress ${progress * 100}%');
+          common
+              .logD('upload file $filename -- $i, progress ${progress * 100}%');
           if (!await _uploadMultipart(uri, multipartFile, headerMap)) {
-            common.logE('upload file ${file.name} -- $i failed');
+            common.logE('upload file $filename -- $i failed');
             return;
           }
           ref
@@ -262,18 +277,18 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
               .add(message.msgId!, progress);
         }
         // all parts have benn uploaded success
-        _sendFileWebsocketMessage(message, file.name);
+        _sendFileWebsocketMessage(message, filename);
         ref
             .read(messageSendProgressNotifierProvider.notifier)
             .delete(message.msgId!);
       } else {
         // upload
         MultipartFile multipartFile = MultipartFile.fromStream(
-            () => file.readStream!, file.size,
-            filename: file.name);
-        common.logD('upload file ${file.name}');
+            () => fileStream!, fileSize,
+            filename: filename);
+        common.logD('upload file $filename');
         if (await _uploadMultipart(uri, multipartFile, headerMap)) {
-          _sendFileWebsocketMessage(message, file.name);
+          _sendFileWebsocketMessage(message, filename);
         }
       }
     } catch (e) {
@@ -350,7 +365,11 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
     switch (ContentType.values[msg.contentType!]) {
       case ContentType.text:
         var contentStr = utf8.decode(msg.content!);
-        return _renderTextMsg(msg.senderNickname!, contentStr, isSelf: isSelf);
+        return WebTextMessage(
+            senderName: msg.senderNickname!,
+            content: contentStr,
+            isSelf: isSelf,
+            maxLength: textMaxLength.toDouble());
       case ContentType.file:
         return WebFileMessage(msg: msg, isSelf: isSelf);
       default:
@@ -395,7 +414,6 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
                   "已复制聊天内容",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black,
                   ),
                 )));
           });

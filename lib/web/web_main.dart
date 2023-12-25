@@ -27,7 +27,7 @@ connectWs(Uri uri) {
 }
 
 class WebFramework extends ConsumerWidget {
-  const WebFramework({Key? key}) : super(key: key);
+  const WebFramework({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +37,7 @@ class WebFramework extends ConsumerWidget {
                 title: '本地聊天',
                 home: Scaffold(
                     appBar: AppBar(
-                      title: const Text("localchat"),
+                      title: const Center(child: Text("localchat")),
                     ),
                     body: const WebChatPage()))));
   }

@@ -1,6 +1,7 @@
 // SessionMessageBox 是消息展示区域
 import 'dart:convert';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -13,7 +14,8 @@ import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
 import 'package:localchat/oss/oss_service.dart';
-import 'package:localchat/pages/chat/FileMessage.dart';
+import 'package:localchat/pages/chat/File_message.dart';
+import 'package:localchat/pages/chat/text_message.dart';
 import 'package:localchat/state/messages_state.dart';
 import 'package:localchat/utils.dart' as utils;
 import 'package:pasteboard/pasteboard.dart';
@@ -83,15 +85,22 @@ class ConversationMessageBoxState
   Widget _buildMessageShowWidget(
       List<String> renderMessages, BuildContext context) {
     _scrollToBottom();
-    return Expanded(
-        child: ListView.builder(
-      padding: const EdgeInsets.all(10),
-      controller: _scrollController,
-      itemCount: renderMessages.length,
-      itemBuilder: (context, index) {
-        return renderMessage(getMsg(renderMessages[index])!, context);
-      },
-    ));
+    // drag and drop widget
+    return DropTarget(
+        onDragDone: (detail) async {
+          for (var file in detail.files) {
+            _sendFile(file.path);
+          }
+        },
+        child: Expanded(
+            child: ListView.builder(
+          // padding: const EdgeInsets.all(10),
+          controller: _scrollController,
+          itemCount: renderMessages.length,
+          itemBuilder: (context, index) {
+            return renderMessage(getMsg(renderMessages[index])!, context);
+          },
+        )));
   }
 
   Column _buildMessageInputRow(BuildContext context) {
@@ -297,78 +306,13 @@ class ConversationMessageBoxState
   ///
   /// if isSelf is true, the message will be rendered on the right side,
   /// otherwise on the left side
-  Row _renderTextMsg(String name, String content, BuildContext context,
+  TextMessage _renderTextMsg(String name, String content, BuildContext context,
       {bool isSelf = false}) {
-    String fellowAvtar = 'assets/images/avatarMan.jpg';
-    var align = isSelf ? MainAxisAlignment.end : MainAxisAlignment.start;
-    var senderAvatar = Container(
-      margin: const EdgeInsets.all(10),
-      child: Image(
-          width: 50,
-          height: 50,
-          image:
-              AssetImage(isSelf ? 'assets/images/avatarMan.jpg' : fellowAvtar)),
-    );
-    var senderName = Text.rich(TextSpan(children: [
-      TextSpan(
-        text: isSelf ? '  $name    ' : '$name  ',
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ]));
-    var copyButton = Container(
-      constraints: const BoxConstraints(maxWidth: 600),
-      child: IconButton(
-        icon: const Icon(Icons.copy),
-        tooltip: '复制',
-        onPressed: () {
-          Clipboard.setData(ClipboardData(text: content)).then((_) {
-            utils.showSnackBar(
-                context,
-                const Center(
-                    child: Text(
-                  "已复制聊天内容",
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal),
-                )));
-          });
-        },
-      ),
-    );
-    Color messageBackgroundColor;
-    if (Theme.of(context).brightness == Brightness.dark) {
-      messageBackgroundColor = Colors.white24;
-    } else {
-      messageBackgroundColor = Colors.lightGreenAccent;
-    }
-    var messageText = Container(
-      constraints: const BoxConstraints(maxWidth: 600),
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: messageBackgroundColor, width: 1),
-          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-        ),
-        shadows: [
-          BoxShadow(
-            color: messageBackgroundColor,
-            blurRadius: 10.0,
-          ),
-        ],
-      ),
-      child: Text(
-        '  $content  ',
-        style: const TextStyle(fontSize: 20),
-      ),
-    );
-    return Row(
-      mainAxisAlignment: align,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: isSelf
-          ? [copyButton, messageText, senderAvatar]
-          : [senderAvatar, messageText, copyButton],
+    return TextMessage(
+      senderName: name,
+      content: content,
+      isSelf: isSelf,
+      fontSize: 20,
     );
   }
 

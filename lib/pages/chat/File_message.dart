@@ -75,9 +75,8 @@ class FileMessageState extends ConsumerState<FileMessage> {
     var messageText = Container(
       margin: const EdgeInsets.all(5.0),
       constraints: const BoxConstraints(maxWidth: 600),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        border: Border.all(width: 8),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
       ),
       child: FloatingActionButton.extended(
           icon: const Icon(Icons.file_download_done),

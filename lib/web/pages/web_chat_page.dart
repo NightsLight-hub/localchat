@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/http/websocket_message.dart';
@@ -29,15 +30,20 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
   @override
   Widget build(BuildContext context) {
     prepare(context);
-    return Container(
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildSessionName("聊天"),
-            const WebConversationMsgBox(),
-          ],
-        ));
+    return DropTarget(
+        onDragDone: (detail) {
+          setState(() {
+            // _list.addAll(detail.files);
+          });
+        },
+        child: Container(
+            padding: const EdgeInsets.all(5.0),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                WebConversationMsgBox(),
+              ],
+            )));
   }
 
   SizedBox buildSessionName(String showName) {

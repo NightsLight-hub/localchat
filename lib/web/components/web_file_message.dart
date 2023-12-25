@@ -10,10 +10,10 @@ import 'package:path/path.dart' as p;
 
 class WebFileMessage extends ConsumerStatefulWidget {
   const WebFileMessage({
-    Key? key,
+    super.key,
     required this.msg,
     required this.isSelf,
-  }) : super(key: key);
+  });
 
   final MessageModelData msg;
   final bool isSelf;
@@ -76,9 +76,7 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
         margin: const EdgeInsets.all(5.0),
         constraints: BoxConstraints(maxWidth: textMaxLength.toDouble()),
         decoration: const BoxDecoration(
-          // color: widget.isSelf ? const Color(0xFF95EC69) : null,
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
-          // border: Border.all(width: 8, color: Colors.white),
         ),
         child: Column(
           children: [
@@ -124,7 +122,6 @@ class WebFileMessageState extends ConsumerState<WebFileMessage> {
     anchor.href = fileUrl;
     anchor.style.display = fileName;
     anchor.download = fileName;
-    document.body!.children.add(anchor);
     anchor.click();
     document.body!.children.remove(anchor);
   }

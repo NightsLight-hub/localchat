@@ -161,10 +161,8 @@ class ChatPageState extends ConsumerState<ChatPage> {
                   const Center(
                       child: Text(
                     "已复制聊天室地址",
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.normal),
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                   )));
             });
           },
