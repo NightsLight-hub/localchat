@@ -6,7 +6,6 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/config.dart';
 import 'package:localchat/http/websocket_service.dart';
@@ -17,7 +16,6 @@ import 'package:localchat/oss/oss_service.dart';
 import 'package:localchat/pages/chat/File_message.dart';
 import 'package:localchat/pages/chat/text_message.dart';
 import 'package:localchat/state/messages_state.dart';
-import 'package:localchat/utils.dart' as utils;
 import 'package:pasteboard/pasteboard.dart';
 
 class ConversationMessageBox extends ConsumerStatefulWidget {

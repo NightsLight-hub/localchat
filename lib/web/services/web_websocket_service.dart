@@ -19,13 +19,19 @@ class WebWsService {
 
   WebSocketChannel? channel;
   Uri? uri;
-  Timer? _timer;
   final Map<String, Function(String token)> _applyForSendingFileHandlers = {};
 
   void init(String uri) {
     common.logI('WebWsService init');
     this.uri = Uri.parse(uri);
     _reConn();
+  }
+
+  _registerUser() {
+    var user = common.getUserModelData()!;
+    common.logI('register user ${user.nickName}');
+    WebsocketMessage wsMsg = WebsocketMessage.registerUser(user);
+    send(wsMsg);
   }
 
   // process websocket conn
@@ -35,24 +41,17 @@ class WebWsService {
       common.logI('wait websocket channel to be ready');
       await channel!.ready;
       common.logI('websocket channel is ready');
+      // registerUser should be called when websocket connection is established.
+      _registerUser();
       await _listenWsMsg();
     } catch (e, s) {
       common.logW('websocket connect failed, err is $e, stack is $s');
       channel = null;
     }
-
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (channel == null || channel?.closeCode != null) {
-        common.logW('websocket connect failed, try to reconnect');
-        _reConn();
-      }
-    });
   }
 
   _listenWsMsg() async {
     channel!.stream.listen((message) {
-      common.logD('get msg from ws, $message');
       try {
         var data = jsonDecode(message);
         var wsMsg = WebsocketMessage.fromJson(data);
@@ -64,22 +63,6 @@ class WebWsService {
                 .read(messagesNotifierProvider.notifier)
                 .add(msgModel);
             break;
-          case WsMsgType.sendFilePermit:
-            var data = wsMsg.body;
-            List<String> splits = data.split(' ');
-            if (splits.length != 2) {
-              common.logE('invalid send file permit msg');
-              break;
-            }
-            var msgId = splits[0];
-            var token = splits[1];
-            var handler = _applyForSendingFileHandlers[msgId];
-            if (handler != null) {
-              handler(token);
-            } else {
-              common.logW('no handler for msgId $msgId');
-            }
-            break;
           default:
             common.logW('unknown websocket message: $message');
             break;
@@ -87,13 +70,18 @@ class WebWsService {
       } catch (e) {
         common.logW(e);
       }
-    }, onError: (err) {
-      common.logE('get error from ws, $err');
-    }, onDone: () {
+    }, onError: (err) async {
+      var code = channel?.closeCode;
+      var reason = channel?.closeReason;
+      common.logI('ws channel close [$code] $reason, $err');
+      channel = null;
+      _reConn();
+    }, onDone: () async {
       var code = channel?.closeCode;
       var reason = channel?.closeReason;
       common.logI('ws channel close [$code] $reason');
       channel = null;
+      _reConn();
     });
   }
 

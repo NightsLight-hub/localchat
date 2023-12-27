@@ -7,6 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   isar_flutter_libs
   pasteboard
+  screen_retriever
+  tray_manager
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

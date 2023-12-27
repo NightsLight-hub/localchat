@@ -78,22 +78,6 @@ class HomePageState extends ConsumerState<HomePage> {
                 SizedBox(height: 20),
               ],
             ),
-            trailing: Expanded(
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                ThemeButton(
-                  width: 50,
-                  height: 50,
-                  onChanged: (value) {
-                    logger.d('change theme');
-                    AdaptiveTheme.of(context).toggleThemeMode(useSystem: false);
-                  },
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-              ]),
-            ),
 
             destinations: HomeTab.values.map((tab) {
               return NavigationRailDestination(

@@ -66,6 +66,8 @@ dependencies:
   theme_button: ^1.0.4
   desktop_drop: ^0.4.4
   cross_file: ^0.3.3+8
+  window_manager: ^0.3.7
+  tray_manager: ^0.2.0
 
 dev_dependencies:
   flutter_test:

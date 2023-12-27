@@ -6,11 +6,14 @@ import 'package:dio/dio.dart';
 UserModelData? _user;
 
 String _address = '';
+String _host = '';
 
 set address(String a) {
   _address = a;
+  _host = Uri.parse(a).host;
 }
 
+String get host => _host;
 String get address => _address;
 
 UserModelData? getUserModelData() {

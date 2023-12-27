@@ -4,8 +4,7 @@ import 'package:localchat/models/dbmodels_adapter.dart';
 
 enum WsMsgType {
   registerUser(value: 0),
-  sendMessage(value: 1),
-  sendFilePermit(value: 2);
+  sendMessage(value: 1);
 
   const WsMsgType({required this.value});
 
@@ -36,10 +35,5 @@ class WebsocketMessage {
   WebsocketMessage.sendMessage(MessageModelData messageModel) {
     type = WsMsgType.sendMessage;
     body = jsonEncode(messageModel);
-  }
-
-  WebsocketMessage.sendFilePermit(String data) {
-    type = WsMsgType.sendFilePermit;
-    body = data;
   }
 }

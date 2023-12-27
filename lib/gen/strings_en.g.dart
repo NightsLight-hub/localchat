@@ -1,11 +1,16 @@
 part of 'strings.g.dart';
 
 // Path: <root>
-class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
+class Translations implements BaseTranslations<AppLocale, Translations> {
+	/// Returns the current translations of the given [context].
+	///
+	/// Usage:
+	/// final t = Translations.of(context);
+	static Translations of(BuildContext context) => InheritedLocaleData.of<AppLocale, Translations>(context).translations;
 
 	/// You can call this constructor and build your own translation instance of this locale.
 	/// Constructing via the enum [AppLocale.build] is preferred.
-	_StringsEn.build({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver})
+	Translations.build({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
 		  $meta = TranslationMetadata(
 		    locale: AppLocale.en,
@@ -15,9 +20,9 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 		  );
 
 	/// Metadata for the translations of <en>.
-	@override final TranslationMetadata<AppLocale, _StringsEn> $meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
-	late final _StringsEn _root = this; // ignore: unused_field
+	late final Translations _root = this; // ignore: unused_field
 
 	// Translations
 	String get locale => 'English';
@@ -33,7 +38,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 class _StringsGeneralEn {
 	_StringsGeneralEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get accept => 'Accept';
@@ -79,7 +84,7 @@ class _StringsGeneralEn {
 class _StringsNetworkTabEn {
 	_StringsNetworkTabEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Network';
@@ -89,7 +94,7 @@ class _StringsNetworkTabEn {
 class _StringsChatTabEn {
 	_StringsChatTabEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Chat';
@@ -99,7 +104,7 @@ class _StringsChatTabEn {
 class _StringsSettingsTabEn {
 	_StringsSettingsTabEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Settings';
@@ -113,7 +118,7 @@ class _StringsSettingsTabEn {
 class _StringsTroubleshootPageEn {
 	_StringsTroubleshootPageEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Troubleshoot';
@@ -128,7 +133,7 @@ class _StringsTroubleshootPageEn {
 class _StringsSettingsTabGeneralEn {
 	_StringsSettingsTabGeneralEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'General';
@@ -149,7 +154,7 @@ class _StringsSettingsTabGeneralEn {
 class _StringsSettingsTabReceiveEn {
 	_StringsSettingsTabReceiveEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Receive';
@@ -164,7 +169,7 @@ class _StringsSettingsTabReceiveEn {
 class _StringsSettingsTabNetworkEn {
 	_StringsSettingsTabNetworkEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get title => 'Network';
@@ -184,7 +189,7 @@ class _StringsSettingsTabNetworkEn {
 class _StringsTroubleshootPageFirewallEn {
 	_StringsTroubleshootPageFirewallEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get symptom => 'This app can send files to other devices but other devices cannot send files to this device.';
@@ -196,7 +201,7 @@ class _StringsTroubleshootPageFirewallEn {
 class _StringsTroubleshootPageNoConnectionEn {
 	_StringsTroubleshootPageNoConnectionEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get symptom => 'Both devices cannot discover each other nor can they share files.';
@@ -207,7 +212,7 @@ class _StringsTroubleshootPageNoConnectionEn {
 class _StringsSettingsTabGeneralBrightnessOptionsEn {
 	_StringsSettingsTabGeneralBrightnessOptionsEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get system => 'System';
@@ -219,7 +224,7 @@ class _StringsSettingsTabGeneralBrightnessOptionsEn {
 class _StringsSettingsTabGeneralColorOptionsEn {
 	_StringsSettingsTabGeneralColorOptionsEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get system => 'System';
@@ -230,7 +235,7 @@ class _StringsSettingsTabGeneralColorOptionsEn {
 class _StringsSettingsTabGeneralLanguageOptionsEn {
 	_StringsSettingsTabGeneralLanguageOptionsEn._(this._root);
 
-	final _StringsEn _root; // ignore: unused_field
+	final Translations _root; // ignore: unused_field
 
 	// Translations
 	String get system => 'System';

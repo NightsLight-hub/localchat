@@ -21,6 +21,7 @@ class WebSocketService {
 
   addChannel(Request request, $websocket.WebSocketChannel channel) {
     // every client will connect to the server using websocket.
+    UserModelData? user;
     channel.stream.listen((message) {
       logger.t('message: $message');
       try {
@@ -29,8 +30,9 @@ class WebSocketService {
         switch (wsMsg.type) {
           case WsMsgType.registerUser:
             var userModel = UserModelData.fromJson(jsonDecode(wsMsg.body));
-            userChannelMap[userModel.userId] = channel;
             logger.i('add user ${userModel.nickName}, id ${userModel.userId}');
+            user = userModel;
+            _addUserWsChannel(user!.userId, channel);
             utils
                 .getMainRef()
                 .read(usersNotifierProvider.notifier)
@@ -48,10 +50,23 @@ class WebSocketService {
         logger.e(e);
       }
     }, onError: (error) {
-      logger.e('error: $error');
+      logger.e(
+          '${user?.nickName} ${user?.userId} websocket channel error: $error');
+      _deleteUserWsChannel(user?.userId);
     }, onDone: () {
-      logger.e('$channel done');
-    });
+      logger.w('${user?.nickName} ${user?.userId} websocket channel done');
+      _deleteUserWsChannel(user?.userId);
+    }, cancelOnError: true);
+  }
+
+  _addUserWsChannel(String userId, $websocket.WebSocketChannel channel) {
+    userChannelMap[userId] = channel;
+  }
+
+  _deleteUserWsChannel(String? userId) {
+    if (userId != null) {
+      userChannelMap.remove(userId);
+    }
   }
 
   _processMessage(MessageModelData msgModel, String rawWsMsg) {
@@ -71,12 +86,10 @@ class WebSocketService {
       return;
     }
     channel.sink.add(msg);
-    logger.i('send msg to $userId');
   }
 
   sendMessage(MessageModelData message) {
     for (var ent in userChannelMap.entries) {
-      logger.i('send msg to ${ent.key}');
       ent.value.sink.add(jsonEncode(WebsocketMessage.sendMessage(message)));
     }
   }

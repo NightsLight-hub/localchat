@@ -40,6 +40,8 @@ build.bat
 ```shell
 fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart --web-renderer html
 ```
+必须用`html`模式渲染， 用 `canvas`渲染 似乎拖拽会出问题
+
 
 ### Or just build server
 ```shell

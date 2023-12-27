@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/gen/strings.g.dart';
 import 'package:localchat/web/pages/web_chat_page.dart';
-import 'package:localchat/web/services/web_websocket_service.dart';
 import 'package:localchat/web/web_common.dart' as common;
 
 main(List<String> args) {
@@ -16,14 +15,7 @@ main(List<String> args) {
     common.address = 'http://localhost:8080'; // only used when debug
   }
   common.logI('server address: ${common.address}');
-  connectWs(uri);
   runApp(const WebFramework());
-}
-
-connectWs(Uri uri) {
-  var wsServerUrl = "ws://${uri.host}:8081";
-  common.logI('wsServerUrl: $wsServerUrl');
-  WebWsService().init(wsServerUrl);
 }
 
 class WebFramework extends ConsumerWidget {

@@ -66,6 +66,12 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
     );
   }
 
+  _connectWs(String host) {
+    var wsServerUrl = "ws://$host:8081";
+    common.logI('wsServerUrl: $wsServerUrl');
+    WebWsService().init(wsServerUrl);
+  }
+
   prepare(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 50));
     final prefs = await SharedPreferences.getInstance();
@@ -75,7 +81,7 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
     if (value.isNotEmpty) {
       UserModelData user = UserModelData.fromJson(jsonDecode(value));
       common.setUserModelData(user);
-      registerUser(user);
+      _connectWs(common.host);
       return;
     }
 
@@ -111,7 +117,7 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
                                 userId: utils.uuid(), nickName: nickName);
                             prefs.setString(key, jsonEncode(user));
                             common.setUserModelData(user);
-                            registerUser(user);
+                            _connectWs(common.host);
                             Navigator.pop(context);
                           }
                         },
@@ -122,11 +128,5 @@ class WebChatPageState extends ConsumerState<WebChatPage> {
                 ));
           });
     }
-  }
-
-  registerUser(UserModelData user) {
-    common.logI('register user ${user.nickName}');
-    WebsocketMessage wsMsg = WebsocketMessage.registerUser(user);
-    WebWsService().send(wsMsg);
   }
 }

@@ -23,7 +23,7 @@ final messagesNotifierProvider =
 
 typedef _$MessagesNotifier = AsyncNotifier<List<String>>;
 String _$messageSendProgressNotifierHash() =>
-    r'645a741d064400b27df07a60d47546544fffd781';
+    r'56dcfb13471b5b131741c522e2f22a9251c06edc';
 
 /// See also [MessageSendProgressNotifier].
 @ProviderFor(MessageSendProgressNotifier)
