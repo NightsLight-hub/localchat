@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:localchat/gen/strings.g.dart';
 import 'package:localchat/http/websocket_message.dart';
 import 'package:localchat/models/common.dart' as common_model;
 import 'package:localchat/models/common.dart';
@@ -404,15 +405,15 @@ class WebConversationMsgBoxState extends ConsumerState<WebConversationMsgBox> {
       margin: const EdgeInsets.only(left: 5, right: 5),
       child: IconButton(
         icon: const Icon(Icons.copy),
-        tooltip: '复制',
+        tooltip: t.general.copy,
         onPressed: () {
           Clipboard.setData(ClipboardData(text: content)).then((_) {
             utils.showSnackBar(
                 context,
-                const Center(
+                Center(
                     child: Text(
-                  "已复制聊天内容",
-                  style: TextStyle(
+                  t.general.copiedToClipboard,
+                  style: const TextStyle(
                     fontSize: 16,
                   ),
                 )));

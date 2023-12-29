@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/utils.dart' as utils;
+import 'package:localchat/gen/strings.g.dart';
 
 class WebTextMessage extends ConsumerStatefulWidget {
   const WebTextMessage(
@@ -50,14 +51,14 @@ class TextMessageState extends ConsumerState<WebTextMessage> {
       constraints: const BoxConstraints(maxWidth: 30),
       child: IconButton(
         icon: const Icon(Icons.copy),
-        tooltip: '复制',
+        tooltip: t.general.copy,
         onPressed: () {
           Clipboard.setData(ClipboardData(text: widget.content)).then((_) {
             utils.showSnackBar(
                 context,
                 Center(
                     child: Text(
-                  "已复制聊天内容",
+                  t.general.copiedToClipboard,
                   style: TextStyle(
                       fontSize: widget.fontSize, fontWeight: FontWeight.normal),
                 )));

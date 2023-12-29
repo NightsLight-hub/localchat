@@ -4,6 +4,7 @@ import 'package:isar/isar.dart';
 import 'package:localchat/config.dart';
 import 'package:localchat/logger.dart';
 import 'package:localchat/models/dbmodels.dart';
+import 'package:localchat/gen/strings.g.dart';
 
 class Database {
   static final Database _inst = Database._internal();
@@ -30,6 +31,7 @@ class Database {
       isar = Isar.openSync([
         MessageModelSchema,
         UsersModelSchema,
+        SettingsModelSchema,
       ], directory: cachePath);
       _initSelf();
       inited = true;
@@ -55,7 +57,7 @@ class Database {
       return;
     }
     var self = UsersModel()
-      ..nickName = "主持人"
+      ..nickName = t.constants.hostNickName
       ..userId = Config().selfId
       ..me = 1;
     isar.writeTxn(() => isar.usersModels.put(self));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/config.dart';
+import 'package:localchat/gen/strings.g.dart';
 import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
 import 'package:localchat/models/dbmodels_adapter.dart';
@@ -140,7 +141,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
       builder: (BuildContext context, SearchController controller) {
         return GestureDetector(
           child: Tooltip(
-              message: "左键单击切换网络，右键单击复制聊天室地址",
+              message: t.chatTab.qrToolTip,
               child: Center(
                 child: PrettyQr(
                   size: 180,
@@ -158,11 +159,11 @@ class ChatPageState extends ConsumerState<ChatPage> {
             Clipboard.setData(ClipboardData(text: chatServerUrl)).then((_) {
               utils.showSnackBar(
                   context,
-                  const Center(
+                  Center(
                       child: Text(
-                    "已复制聊天室地址",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                    t.general.copiedAddressToClipboard,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.normal),
                   )));
             });
           },

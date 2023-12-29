@@ -26,7 +26,7 @@ class _StringsZhCn extends Translations {
 	@override late final _StringsNetworkTabZhCn networkTab = _StringsNetworkTabZhCn._(_root);
 	@override late final _StringsChatTabZhCn chatTab = _StringsChatTabZhCn._(_root);
 	@override late final _StringsSettingsTabZhCn settingsTab = _StringsSettingsTabZhCn._(_root);
-	@override late final _StringsTroubleshootPageZhCn troubleshootPage = _StringsTroubleshootPageZhCn._(_root);
+	@override late final _StringsConstantsZhCn constants = _StringsConstantsZhCn._(_root);
 }
 
 // Path: general
@@ -46,6 +46,7 @@ class _StringsGeneralZhCn extends _StringsGeneralEn {
 	@override String get continueStr => '继续';
 	@override String get copy => '复制';
 	@override String get copiedToClipboard => '已复制到剪贴板';
+	@override String get copiedAddressToClipboard => '已复制聊天室地址';
 	@override String get decline => '拒绝';
 	@override String get done => '完成';
 	@override String get edit => '编辑';
@@ -93,6 +94,10 @@ class _StringsChatTabZhCn extends _StringsChatTabEn {
 
 	// Translations
 	@override String get title => '聊天';
+	@override String get message => '消息';
+	@override String get sendFile => '发送文件';
+	@override String get send => '发送';
+	@override String get qrToolTip => '左键单击切换网络，右键单击复制聊天室地址';
 }
 
 // Path: settingsTab
@@ -104,24 +109,16 @@ class _StringsSettingsTabZhCn extends _StringsSettingsTabEn {
 	// Translations
 	@override String get title => '设置';
 	@override late final _StringsSettingsTabGeneralZhCn general = _StringsSettingsTabGeneralZhCn._(_root);
-	@override late final _StringsSettingsTabReceiveZhCn receive = _StringsSettingsTabReceiveZhCn._(_root);
-	@override late final _StringsSettingsTabNetworkZhCn network = _StringsSettingsTabNetworkZhCn._(_root);
-	@override String get advancedSettings => '高级设置';
 }
 
-// Path: troubleshootPage
-class _StringsTroubleshootPageZhCn extends _StringsTroubleshootPageEn {
-	_StringsTroubleshootPageZhCn._(_StringsZhCn root) : this._root = root, super._(root);
+// Path: constants
+class _StringsConstantsZhCn extends _StringsConstantsEn {
+	_StringsConstantsZhCn._(_StringsZhCn root) : this._root = root, super._(root);
 
 	@override final _StringsZhCn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '故障排除';
-	@override String get subTitle => '应用没有按预期工作？您可以在这里找到常用解决方案。';
-	@override String get solution => '解决方案：';
-	@override String get fixButton => '自动修复';
-	@override late final _StringsTroubleshootPageFirewallZhCn firewall = _StringsTroubleshootPageFirewallZhCn._(_root);
-	@override late final _StringsTroubleshootPageNoConnectionZhCn noConnection = _StringsTroubleshootPageNoConnectionZhCn._(_root);
+	@override String get hostNickName => '主持人';
 }
 
 // Path: settingsTab.general
@@ -132,98 +129,22 @@ class _StringsSettingsTabGeneralZhCn extends _StringsSettingsTabGeneralEn {
 
 	// Translations
 	@override String get title => '通用';
-	@override String get brightness => '亮度';
-	@override late final _StringsSettingsTabGeneralBrightnessOptionsZhCn brightnessOptions = _StringsSettingsTabGeneralBrightnessOptionsZhCn._(_root);
-	@override String get color => '颜色';
-	@override late final _StringsSettingsTabGeneralColorOptionsZhCn colorOptions = _StringsSettingsTabGeneralColorOptionsZhCn._(_root);
+	@override String get theme => '主题';
+	@override late final _StringsSettingsTabGeneralThemeOptionsZhCn themeOptions = _StringsSettingsTabGeneralThemeOptionsZhCn._(_root);
 	@override String get language => '语言';
 	@override late final _StringsSettingsTabGeneralLanguageOptionsZhCn languageOptions = _StringsSettingsTabGeneralLanguageOptionsZhCn._(_root);
-	@override String get saveWindowPlacement => '关闭时：保存窗口位置';
 	@override String get minimizeToTray => '关闭时：最小化到系统托盘';
-	@override String get launchAtStartup => '登录系统后自动启动程序';
-	@override String get launchMinimized => '静默自启：只启动托盘服务';
-	@override String get animations => '动画效果';
 }
 
-// Path: settingsTab.receive
-class _StringsSettingsTabReceiveZhCn extends _StringsSettingsTabReceiveEn {
-	_StringsSettingsTabReceiveZhCn._(_StringsZhCn root) : this._root = root, super._(root);
+// Path: settingsTab.general.themeOptions
+class _StringsSettingsTabGeneralThemeOptionsZhCn extends _StringsSettingsTabGeneralThemeOptionsEn {
+	_StringsSettingsTabGeneralThemeOptionsZhCn._(_StringsZhCn root) : this._root = root, super._(root);
 
 	@override final _StringsZhCn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => '接收';
-	@override String get quickSave => '${_root.general.quickSave}';
-	@override String get destination => '保存目录';
-	@override String get downloads => '(下载)';
-	@override String get saveToGallery => '保存到相册';
-	@override String get saveToHistory => '保存到历史记录';
-}
-
-// Path: settingsTab.network
-class _StringsSettingsTabNetworkZhCn extends _StringsSettingsTabNetworkEn {
-	_StringsSettingsTabNetworkZhCn._(_StringsZhCn root) : this._root = root, super._(root);
-
-	@override final _StringsZhCn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => '网络';
-	@override String get needRestart => '重启服务器生效！';
-	@override String get server => '服务器';
-	@override String get alias => '别名';
-	@override String get deviceType => '设备类型';
-	@override String get deviceModel => '设备型号';
-	@override String get port => '端口';
-	@override String portWarning({required Object defaultPort}) => '由于正在使用自定义端口，你可能不会被其他设备检测到。（默认端口：${defaultPort}）';
-	@override String get encryption => '加密';
-	@override String get multicastGroup => '多播';
-	@override String multicastGroupWarning({required Object defaultMulticast}) => '由于正在使用自定义多播地址，你可能不会被其他设备检测到。（默认地址：${defaultMulticast}）';
-}
-
-// Path: troubleshootPage.firewall
-class _StringsTroubleshootPageFirewallZhCn extends _StringsTroubleshootPageFirewallEn {
-	_StringsTroubleshootPageFirewallZhCn._(_StringsZhCn root) : this._root = root, super._(root);
-
-	@override final _StringsZhCn _root; // ignore: unused_field
-
-	// Translations
-	@override String get symptom => '此设备可以发送文件至其他设备，但其它设备无法发送文件到此设备。';
-	@override String solution({required Object port}) => '这最可能是由防火墙引起的。你可以通过在端口 ${port} 上允许（UDP 和 TCP）的传入请求来解决这个问题。';
-	@override String get openFirewall => '打开防火墙';
-}
-
-// Path: troubleshootPage.noConnection
-class _StringsTroubleshootPageNoConnectionZhCn extends _StringsTroubleshootPageNoConnectionEn {
-	_StringsTroubleshootPageNoConnectionZhCn._(_StringsZhCn root) : this._root = root, super._(root);
-
-	@override final _StringsZhCn _root; // ignore: unused_field
-
-	// Translations
-	@override String get symptom => '双方设备均无法发现对方或者分享文件。';
-	@override String get solution => '当问题发生在双方设备上时，请先确认双方设备处于同一 Wi‑Fi 网络内，且有相同的网络（端口、多播地址、加密选项）配置。若因 Wi‑Fi 不允许参与者间通信，那么请在路由器中关闭这个（如：AP 隔离）选项。';
-}
-
-// Path: settingsTab.general.brightnessOptions
-class _StringsSettingsTabGeneralBrightnessOptionsZhCn extends _StringsSettingsTabGeneralBrightnessOptionsEn {
-	_StringsSettingsTabGeneralBrightnessOptionsZhCn._(_StringsZhCn root) : this._root = root, super._(root);
-
-	@override final _StringsZhCn _root; // ignore: unused_field
-
-	// Translations
-	@override String get system => '跟随系统';
-	@override String get dark => '暗色';
-	@override String get light => '亮色';
-}
-
-// Path: settingsTab.general.colorOptions
-class _StringsSettingsTabGeneralColorOptionsZhCn extends _StringsSettingsTabGeneralColorOptionsEn {
-	_StringsSettingsTabGeneralColorOptionsZhCn._(_StringsZhCn root) : this._root = root, super._(root);
-
-	@override final _StringsZhCn _root; // ignore: unused_field
-
-	// Translations
-	@override String get system => '跟随系统';
-	@override String get oled => 'OLED';
+	@override String get dark => '暗黑';
+	@override String get light => '明亮';
 }
 
 // Path: settingsTab.general.languageOptions

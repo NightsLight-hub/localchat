@@ -90,3 +90,18 @@ class UsersModel {
     );
   }
 }
+
+@collection
+class SettingsModel {
+  Id? id;
+
+  bool minimizeToTray = true;
+  String locale = 'system';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'minimizeToTray': minimizeToTray,
+      'locale': locale,
+    };
+  }
+}

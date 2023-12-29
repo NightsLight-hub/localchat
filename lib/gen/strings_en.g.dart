@@ -31,7 +31,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final _StringsNetworkTabEn networkTab = _StringsNetworkTabEn._(_root);
 	late final _StringsChatTabEn chatTab = _StringsChatTabEn._(_root);
 	late final _StringsSettingsTabEn settingsTab = _StringsSettingsTabEn._(_root);
-	late final _StringsTroubleshootPageEn troubleshootPage = _StringsTroubleshootPageEn._(_root);
+	late final _StringsConstantsEn constants = _StringsConstantsEn._(_root);
 }
 
 // Path: general
@@ -51,6 +51,7 @@ class _StringsGeneralEn {
 	String get continueStr => 'Continue';
 	String get copy => 'Copy';
 	String get copiedToClipboard => 'Copied to Clipboard';
+	String get copiedAddressToClipboard => 'Copied Chat Address to Clipboard';
 	String get decline => 'Decline';
 	String get done => 'Done';
 	String get delete => 'Delete';
@@ -98,6 +99,10 @@ class _StringsChatTabEn {
 
 	// Translations
 	String get title => 'Chat';
+	String get message => 'Message';
+	String get sendFile => 'Send File';
+	String get send => 'Send';
+	String get qrToolTip => 'Left click to switch network, right click to copy chat room address';
 }
 
 // Path: settingsTab
@@ -109,24 +114,16 @@ class _StringsSettingsTabEn {
 	// Translations
 	String get title => 'Settings';
 	late final _StringsSettingsTabGeneralEn general = _StringsSettingsTabGeneralEn._(_root);
-	late final _StringsSettingsTabReceiveEn receive = _StringsSettingsTabReceiveEn._(_root);
-	late final _StringsSettingsTabNetworkEn network = _StringsSettingsTabNetworkEn._(_root);
-	String get advancedSettings => 'Advanced settings';
 }
 
-// Path: troubleshootPage
-class _StringsTroubleshootPageEn {
-	_StringsTroubleshootPageEn._(this._root);
+// Path: constants
+class _StringsConstantsEn {
+	_StringsConstantsEn._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	String get title => 'Troubleshoot';
-	String get subTitle => 'This app does not work as expected? Here you can find common solutions.';
-	String get solution => 'Solution:';
-	String get fixButton => 'Fix automatically';
-	late final _StringsTroubleshootPageFirewallEn firewall = _StringsTroubleshootPageFirewallEn._(_root);
-	late final _StringsTroubleshootPageNoConnectionEn noConnection = _StringsTroubleshootPageNoConnectionEn._(_root);
+	String get hostNickName => 'Compere';
 }
 
 // Path: settingsTab.general
@@ -137,98 +134,22 @@ class _StringsSettingsTabGeneralEn {
 
 	// Translations
 	String get title => 'General';
-	String get brightness => 'Theme';
-	late final _StringsSettingsTabGeneralBrightnessOptionsEn brightnessOptions = _StringsSettingsTabGeneralBrightnessOptionsEn._(_root);
-	String get color => 'Color';
-	late final _StringsSettingsTabGeneralColorOptionsEn colorOptions = _StringsSettingsTabGeneralColorOptionsEn._(_root);
+	String get theme => 'Theme';
+	late final _StringsSettingsTabGeneralThemeOptionsEn themeOptions = _StringsSettingsTabGeneralThemeOptionsEn._(_root);
 	String get language => 'Language';
 	late final _StringsSettingsTabGeneralLanguageOptionsEn languageOptions = _StringsSettingsTabGeneralLanguageOptionsEn._(_root);
-	String get saveWindowPlacement => 'Quit: Save window placement';
 	String get minimizeToTray => 'Quit: Minimize to Tray/Menu Bar';
-	String get launchAtStartup => 'Autostart after login';
-	String get launchMinimized => 'Autostart: Start hidden';
-	String get animations => 'Animations';
 }
 
-// Path: settingsTab.receive
-class _StringsSettingsTabReceiveEn {
-	_StringsSettingsTabReceiveEn._(this._root);
+// Path: settingsTab.general.themeOptions
+class _StringsSettingsTabGeneralThemeOptionsEn {
+	_StringsSettingsTabGeneralThemeOptionsEn._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	String get title => 'Receive';
-	String get quickSave => '${_root.general.quickSave}';
-	String get destination => 'Destination';
-	String get downloads => '(Downloads)';
-	String get saveToGallery => 'Save media to gallery';
-	String get saveToHistory => 'Save to history';
-}
-
-// Path: settingsTab.network
-class _StringsSettingsTabNetworkEn {
-	_StringsSettingsTabNetworkEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	String get title => 'Network';
-	String get needRestart => 'Restart the server to apply the settings!';
-	String get server => 'Server';
-	String get alias => 'Alias';
-	String get deviceType => 'Device type';
-	String get deviceModel => 'Device model';
-	String get port => 'Port';
-	String portWarning({required Object defaultPort}) => 'You might not be detected by other devices because you are using a custom port. (default: ${defaultPort})';
-	String get encryption => 'Encryption';
-	String get multicastGroup => 'Multicast';
-	String multicastGroupWarning({required Object defaultMulticast}) => 'You might not be detected by other devices because you are using a custom multicast address. (default: ${defaultMulticast})';
-}
-
-// Path: troubleshootPage.firewall
-class _StringsTroubleshootPageFirewallEn {
-	_StringsTroubleshootPageFirewallEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	String get symptom => 'This app can send files to other devices but other devices cannot send files to this device.';
-	String solution({required Object port}) => 'This is most likely a firewall issue. You can solve this by allowing incoming connections (UDP and TCP) on port ${port}.';
-	String get openFirewall => 'Open Firewall';
-}
-
-// Path: troubleshootPage.noConnection
-class _StringsTroubleshootPageNoConnectionEn {
-	_StringsTroubleshootPageNoConnectionEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	String get symptom => 'Both devices cannot discover each other nor can they share files.';
-	String get solution => 'The problem exists on both sides? Then you need to make sure that both devices are in the same wifi network and share the same configuration (port, multicast address, encryption). The wifi may not allow communication between participants. In this case, this option must be enabled on the router.';
-}
-
-// Path: settingsTab.general.brightnessOptions
-class _StringsSettingsTabGeneralBrightnessOptionsEn {
-	_StringsSettingsTabGeneralBrightnessOptionsEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	String get system => 'System';
 	String get dark => 'Dark';
 	String get light => 'Light';
-}
-
-// Path: settingsTab.general.colorOptions
-class _StringsSettingsTabGeneralColorOptionsEn {
-	_StringsSettingsTabGeneralColorOptionsEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	String get system => 'System';
-	String get oled => 'OLED';
 }
 
 // Path: settingsTab.general.languageOptions

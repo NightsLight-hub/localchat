@@ -48,6 +48,10 @@ fvm flutter build web  --base-href /front/ --release -t lib/web/web_main.dart --
 fvm flutter build windows --release
 ```
 
+### code generation command
+```shell
+fvm dart pub run build_runner build
+```
 ## debug
 During development, both the front-end and back-end start independently, 
 so the front-end cannot directly use window.host.href as the server address.

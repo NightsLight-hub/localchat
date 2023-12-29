@@ -7,7 +7,7 @@ part of 'settings_state.dart';
 // **************************************************************************
 
 String _$settingsStateNotifierHash() =>
-    r'975919c7f9f521cc39a137eff8bbc205703d6e2d';
+    r'a40089e7bfa9bcd080ce3a99386acdc96b078673';
 
 /// See also [SettingsStateNotifier].
 @ProviderFor(SettingsStateNotifier)

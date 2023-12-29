@@ -1,12 +1,9 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/gen/strings.g.dart';
-import 'package:localchat/logger.dart';
 import 'package:localchat/pages/chat/chat_page.dart';
 import 'package:localchat/pages/settings/settings_page.dart';
 import 'package:localchat/utils.dart' as utils;
-import 'package:theme_button/theme_button.dart';
 
 enum HomeTab {
   // network(Icons.wifi),

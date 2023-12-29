@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localchat/config.dart';
+import 'package:localchat/gen/strings.g.dart';
 import 'package:localchat/http/websocket_service.dart';
 import 'package:localchat/logger.dart';
 import 'package:localchat/models/common.dart';
@@ -117,7 +118,7 @@ class ConversationMessageBoxState
                 onEditingComplete: _sendTextMessage,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
-                  labelText: '消息',
+                  labelText: t.chatTab.message,
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -128,7 +129,7 @@ class ConversationMessageBoxState
                             )
                           : const Text(""),
                       IconButton(
-                          tooltip: '发送图片',
+                          tooltip: t.chatTab.sendFile,
                           onPressed: () async {
                             if (filePickerOpen) {
                               return;
@@ -160,7 +161,7 @@ class ConversationMessageBoxState
             TextButton.icon(
               icon: const Icon(Icons.send),
               onPressed: _sendTextMessage,
-              label: const Text('发送'),
+              label: Text(t.chatTab.send),
             ),
           ],
         ),
